@@ -5,7 +5,7 @@ using OpenTracing;
 using OpenTracing.Propagation;
 using System.Globalization;
 
-namespace Jasiri
+namespace Jasiri.Propagation
 {
     public class B3Propagator : IPropagator<ITextMap>
     {

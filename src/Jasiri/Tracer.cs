@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using OpenTracing;
 using OpenTracing.Propagation;
+using Jasiri.Propagation;
 
 namespace Jasiri
 {

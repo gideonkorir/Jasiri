@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jasiri
+namespace Jasiri.Propagation
 {
     public interface IPropagationRegistry
     {

@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Jasiri
 {
+    using Propagation;
     public class TraceOptions
     {
         public Func<DateTimeOffset> Clock { get; set; }
