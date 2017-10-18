@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jasiri
+namespace Jasiri.Propagation
 {
-    public interface IPropagator<T>
+    public interface IPropagator<in T>
     {
         void Inject(ISpanContext spanContext, T carrier);
 
