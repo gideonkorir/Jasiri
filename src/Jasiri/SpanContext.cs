@@ -29,8 +29,8 @@ namespace Jasiri
         public IEnumerable<KeyValuePair<string, string>> GetBaggageItems()
             => System.Linq.Enumerable.Empty<KeyValuePair<string, string>>();
 
-        public SpanContext NewChild(ulong spanId)
-            => new SpanContext(TraceId, spanId, SpanId, Debug, Sampled);
+        public SpanContext NewChild(ulong childSpanId)
+            => new SpanContext(TraceId, childSpanId, SpanId, Debug, Sampled);
 
         public SpanContext Join()
             => new SpanContext(TraceId, SpanId, ParentId, Debug, Sampled, true);
