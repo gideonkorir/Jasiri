@@ -31,7 +31,7 @@ namespace Jasiri
         public string Kind { get; }
 
         public Endpoint LocalEndpoint { get; }
-        public Endpoint RemoteEndpoint { get; }
+        public Endpoint RemoteEndpoint { get; private set; }
 
         public IReadOnlyList<LogData> Logs => logs;
         public IReadOnlyDictionary<string, string> Tags => tags;
@@ -132,6 +132,8 @@ namespace Jasiri
             ThrowDisposed();
             if (!finishTimeStamp.HasValue)
                 finishTimeStamp = finishTimestamp;
+            if (RemoteEndpoint == null && Kind == SpanKind.CLIENT)
+                RemoteEndpoint = Ext.Build(tags);
             tracer.Report(this);
         }
 
