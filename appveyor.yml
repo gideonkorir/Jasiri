@@ -2,7 +2,6 @@ version: '0.0.{build}'
 image: Visual Studio 2017
 branches:
   only:
-  - master
   - develop
 init:
   # Good practise, because Windows line endings are different from Unix/Linux ones
