@@ -26,8 +26,7 @@ namespace Jasiri.Tests.Util
                 return Task.CompletedTask;
             }, TimeSpan.FromMilliseconds(100), cts.Token);
             loop.Start(tcs);
-            await Task.Delay(110);
-            Assert.True(tcs.Task.IsCompleted);
+            await tcs.Task;
         }
     }
 }
