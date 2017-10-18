@@ -148,23 +148,9 @@ namespace Jasiri
 
         Endpoint GetRemote()
         {
-            int port = -1;
-
-            if (!(stringTags.TryGetValue(Tags.PeerService, out string serviceName) || stringTags.TryGetValue(Tags.PeerHostname, out serviceName)))
-            {
-                return null;
-            }
-            if (!(stringTags.TryGetValue(Tags.PeerIpV4, out string ipAddress) || stringTags.TryGetValue(Tags.PeerIpV6, out ipAddress)))
-            {
-                if (!stringTags.TryGetValue(Tags.PeerAddress, out ipAddress))
-                    return null;
-            }
-
-            if (!intTags.TryGetValue(Tags.PeerPort, out port))
-                if (stringTags.TryGetValue(Tags.PeerPort, out var _port) && int.TryParse(_port, out var i))
-                    port = i;
-
-            return new Endpoint(serviceName, ipAddress, port < 0 ? new uint?() : (uint)port);
+            bool hasPort = intTags.TryGetValue(Tags.PeerPort, out var port);
+            int? portOverride = hasPort ? new int?(port) : null;
+            return Ext.Build(stringTags, hasPort ? port : portOverride);
         }
 
         void CombineTags()
