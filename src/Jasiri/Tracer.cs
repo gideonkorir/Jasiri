@@ -32,7 +32,15 @@ namespace Jasiri
             HostEndpoint = options?.Endpoint ?? Ext.GetHostEndpoint();
             Sampler = options?.Sampler ?? new ConstSampler(false);
             Reporter = options?.Reporter ?? NullReporter.Instance;
-            PropagationRegistry = options?.PropagationRegistry ?? new InMemoryPropagationRegistry();
+            PropagationRegistry = options?.PropagationRegistry;
+            if(PropagationRegistry == null)
+            {
+                var registry = new InMemoryPropagationRegistry();
+                var propagator = new B3Propagator();
+                registry.Register(Formats.HttpHeaders, propagator);
+                registry.Register(Formats.TextMap, propagator);
+                PropagationRegistry = registry;
+            }
         }
 
         public ISpanContext Extract<TCarrier>(Format<TCarrier> format, TCarrier carrier)
