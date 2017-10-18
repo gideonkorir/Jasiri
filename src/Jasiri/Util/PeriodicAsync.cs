@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Jasiri
+namespace Jasiri.Util
 {
     public class PeriodicAsync
     {

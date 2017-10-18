@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Jasiri
 {
-    static class Util
+    static class Ext
     {
         public static void AddRange<TKey, TValue>(this IDictionary<TKey, TValue> to, IDictionary<TKey, TValue> from)
         {
