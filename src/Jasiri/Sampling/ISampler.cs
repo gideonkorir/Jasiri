@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jasiri
+namespace Jasiri.Sampling
 {
     public interface ISampler
     {
@@ -15,7 +15,7 @@ namespace Jasiri
 
         public static readonly SamplingStatus NotSampled = new SamplingStatus(false, null);
 
-        private IReadOnlyDictionary<string, string> tags;
+        readonly IReadOnlyDictionary<string, string> tags;
 
         public bool Sampled { get; }
 

@@ -5,7 +5,7 @@ using OpenTracing;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Jasiri
+namespace Jasiri.Reporting
 {
     public class PeriodicReporter : IReporter
     {

@@ -6,14 +6,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Jasiri
+namespace Jasiri.Reporting.Senders
 {
     public class HttpZipkinTraceSender : ISender
     {
-        readonly ZipkinApi zipkinApi;
+        readonly ZipkinHttpApi zipkinApi;
         readonly HttpClient client;
 
-        public HttpZipkinTraceSender(ZipkinApi zipkinApi, HttpClient client)
+        public HttpZipkinTraceSender(ZipkinHttpApi zipkinApi, HttpClient client)
         {
             this.zipkinApi = zipkinApi ?? throw new ArgumentNullException(nameof(zipkinApi));
             this.client = client ?? throw new ArgumentNullException(nameof(client));

@@ -5,6 +5,9 @@ using System.Text;
 namespace Jasiri
 {
     using Propagation;
+    using Reporting;
+    using Sampling;
+
     public class TraceOptions
     {
         public Func<DateTimeOffset> Clock { get; set; }

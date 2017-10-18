@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jasiri
+namespace Jasiri.Sampling
 {
     public class ConstSampler : ISampler
     {

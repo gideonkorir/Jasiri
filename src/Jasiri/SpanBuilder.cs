@@ -1,8 +1,7 @@
 ﻿using OpenTracing;
 using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Text;
+using Jasiri.Sampling;
 
 namespace Jasiri
 {
@@ -96,7 +95,7 @@ namespace Jasiri
         public ISpan Start()
         {
             var spanKind = GetSpanKind();
-            var context = GetOrCreateContext(spanKind);
+            var context = GetOrCreateContext();
             CombineTags();
             var span = new Span(operationName, context, spanKind, startTimestamp ?? tracer.Clock(),
                 tracer.HostEndpoint, GetRemote(), stringTags, tracer);
@@ -104,7 +103,7 @@ namespace Jasiri
             return span;
         }
 
-        SpanContext GetOrCreateContext(string spanKind)
+        SpanContext GetOrCreateContext()
         {
             var spanId = tracer.NewId();
             SpanContext parentContext = null;
@@ -149,14 +148,13 @@ namespace Jasiri
 
         Endpoint GetRemote()
         {
-            string serviceName = null, ipAddress = null;
             int port = -1;
 
-            if(!(stringTags.TryGetValue(Tags.PeerService, out serviceName) || stringTags.TryGetValue(Tags.PeerHostname, out serviceName)))
+            if (!(stringTags.TryGetValue(Tags.PeerService, out string serviceName) || stringTags.TryGetValue(Tags.PeerHostname, out serviceName)))
             {
                 return null;
             }
-            if (!(stringTags.TryGetValue(Tags.PeerIpV4, out ipAddress) || stringTags.TryGetValue(Tags.PeerIpV6, out ipAddress)))
+            if (!(stringTags.TryGetValue(Tags.PeerIpV4, out string ipAddress) || stringTags.TryGetValue(Tags.PeerIpV6, out ipAddress)))
             {
                 if (!stringTags.TryGetValue(Tags.PeerAddress, out ipAddress))
                     return null;
