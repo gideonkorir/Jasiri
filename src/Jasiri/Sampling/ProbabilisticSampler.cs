@@ -13,11 +13,11 @@ namespace Jasiri.Sampling
 
         public ProbabilisticSampler(double probability)
         {
-            if (probability < 0 || probability > 1)
-                throw new ArgumentException("Probability must be between 0 and 1. Supplied value is: " + probability.ToString());
+            if (probability < 0 || probability >= 1)
+                throw new ArgumentException("Probability must be >= 0 && < 1. Supplied value is: " + probability.ToString());
 
             Probability = probability;
-            upperBound = (ulong)(ulong.MaxValue * probability);
+            upperBound = (ulong)Math.Ceiling(ulong.MaxValue * probability);
             tags = new Dictionary<string, string>()
             {
                 ["sampler"] = "probabilistic",
@@ -27,7 +27,7 @@ namespace Jasiri.Sampling
 
         public SamplingStatus Sample(string operationName, ulong traceId)
         {
-            var sampled = traceId <= upperBound;
+            var sampled = traceId < upperBound;
             return new SamplingStatus(sampled, tags);
         }
     }
