@@ -1,6 +1,7 @@
 ﻿using OpenTracing;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 
 namespace Jasiri
@@ -50,7 +51,26 @@ namespace Jasiri
 
         public static Endpoint GetHostEndpoint()
         {
-            return new Endpoint("localhost", "127.0.0.1", null);
+            var hostName = Dns.GetHostName();
+            var ipAddresses = Dns.GetHostAddresses(hostName);
+            IPAddress ipAddress = null;
+            if(ipAddresses?.Length > 0)
+            {
+                foreach(var ip in ipAddresses)
+                {
+                    if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork
+                         || ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
+                    {
+                        if (!IPAddress.IsLoopback(ip))
+                            continue;
+                        else
+                            ipAddress = ip;
+                    }     
+
+                }
+            }
+            ipAddress = ipAddress ?? IPAddress.Loopback;
+            return new Endpoint(hostName, ipAddress.ToString(), null);
         }
     }
 }
