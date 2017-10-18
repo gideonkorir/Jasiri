@@ -27,7 +27,7 @@ namespace Jasiri
 
         public Tracer(TraceOptions options)
         {
-            Clock = options.Clock;
+            Clock = options.Clock ?? Clocks.GenericHighRes;
             NewId = options.NewId ?? RandomLongGenerator.NewId;
             HostEndpoint = options.Endpoint ?? Ext.GetHostEndpoint();
             Sampler = options.Sampler ?? new ConstSampler(false);
