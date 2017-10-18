@@ -149,7 +149,7 @@ namespace Jasiri
         void ThrowDisposed()
         {
             if (disposed)
-                throw new ObjectDisposedException($"Span {context.SpanId} disposed");
+                throw new ObjectDisposedException($"Span operation: {operationName} disposed");
         }
 
         static readonly AsyncLocal<Span> current = new AsyncLocal<Span>();
