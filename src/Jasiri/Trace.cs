@@ -1,13 +1,11 @@
-﻿using OpenTracing;
-using OpenTracing.NullTracer;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jasiri
+namespace OpenTracing
 {
     public static class Trace
     {
-        public static ITracer Tracer { get; set; } = NullTracer.Instance;
+        public static ITracer Tracer { get; set; } = NullTracer.NullTracer.Instance;
     }
 }

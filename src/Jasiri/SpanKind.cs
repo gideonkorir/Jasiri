@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Jasiri
 {
-    static class SpanKind
+    public static class SpanKind
     {
         public const string
             CLIENT = "CLIENT",
