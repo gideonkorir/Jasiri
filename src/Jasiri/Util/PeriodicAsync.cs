@@ -34,7 +34,7 @@ namespace Jasiri.Util
         {
             while(!cancellationToken.IsCancellationRequested)
             {
-                await Task.Delay(waitPeriod);
+                await Task.Delay(waitPeriod, cancellationToken);
                 if (cancellationToken.IsCancellationRequested)
                     break;
                 await callback(arg, cancellationToken);
