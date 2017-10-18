@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using System.IO;
 using OpenTracing;
 
-namespace Jasiri
+namespace Jasiri.Reporting
 {
     public class V2JsonSerializer : ISerializer
     {

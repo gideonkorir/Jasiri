@@ -4,6 +4,8 @@ using System.Text;
 using OpenTracing;
 using OpenTracing.Propagation;
 using Jasiri.Propagation;
+using Jasiri.Reporting;
+using Jasiri.Sampling;
 
 namespace Jasiri
 {
@@ -15,10 +17,10 @@ namespace Jasiri
 
         public Endpoint HostEndpoint { get; }
 
-        public ISampler Sampler { get; }
-        public IReporter Reporter { get; }
+        internal ISampler Sampler { get; }
+        internal IReporter Reporter { get; }
 
-        public IPropagationRegistry PropagationRegistry { get; }
+        internal IPropagationRegistry PropagationRegistry { get; }
         public ISpanBuilder BuildSpan(string operationName)
             => new SpanBuilder(this, operationName);
 
