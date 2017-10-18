@@ -6,6 +6,7 @@ using OpenTracing.Propagation;
 using Jasiri.Propagation;
 using Jasiri.Reporting;
 using Jasiri.Sampling;
+using Jasiri.Util;
 
 namespace Jasiri
 {
@@ -28,7 +29,7 @@ namespace Jasiri
         {
             Clock = options.Clock;
             NewId = options.NewId ?? RandomLongGenerator.NewId;
-            HostEndpoint = options.Endpoint ?? Util.GetHostEndpoint();
+            HostEndpoint = options.Endpoint ?? Ext.GetHostEndpoint();
             Sampler = options.Sampler ?? new ConstSampler(false);
             Reporter = options.Reporter ?? NullReporter.Instance;
             PropagationRegistry = options.PropagationRegistry;

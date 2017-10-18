@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jasiri
+namespace Jasiri.Reporting
 {
     public class Batch<T>
     {

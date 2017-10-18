@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace Jasiri.Reporting
 {
+    using Util;
+
     public class PeriodicReporter : IReporter
     {
         readonly ISender sender;
