@@ -9,6 +9,9 @@ namespace Jasiri.Reporting
     {
         static readonly T[] Empty = new T[0];
         public int MaxSize { get; }
+
+        public int Size => index + 1;
+
         readonly T[] items = null;
         readonly int maxIndex = 0;
         int index = -1;
