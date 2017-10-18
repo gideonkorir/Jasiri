@@ -25,14 +25,14 @@ namespace Jasiri
         public ISpanBuilder BuildSpan(string operationName)
             => new SpanBuilder(this, operationName);
 
-        public Tracer(TraceOptions options)
+        public Tracer(TraceOptions options = null)
         {
-            Clock = options.Clock ?? Clocks.GenericHighRes;
-            NewId = options.NewId ?? RandomLongGenerator.NewId;
-            HostEndpoint = options.Endpoint ?? Ext.GetHostEndpoint();
-            Sampler = options.Sampler ?? new ConstSampler(false);
-            Reporter = options.Reporter ?? NullReporter.Instance;
-            PropagationRegistry = options.PropagationRegistry;
+            Clock = options?.Clock ?? Clocks.GenericHighRes;
+            NewId = options?.NewId ?? RandomLongGenerator.NewId;
+            HostEndpoint = options?.Endpoint ?? Ext.GetHostEndpoint();
+            Sampler = options?.Sampler ?? new ConstSampler(false);
+            Reporter = options?.Reporter ?? NullReporter.Instance;
+            PropagationRegistry = options?.PropagationRegistry ?? new InMemoryPropagationRegistry();
         }
 
         public ISpanContext Extract<TCarrier>(Format<TCarrier> format, TCarrier carrier)
