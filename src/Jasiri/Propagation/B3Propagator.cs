@@ -63,7 +63,7 @@ namespace Jasiri.Propagation
                 carrier.Set(TraceIdHeader, ctx.TraceId.ToString(IdFormat));
                 carrier.Set(SpanIdHeader, ctx.SpanId.ToString(IdFormat));
                 if(ctx.ParentId.HasValue)
-                    carrier.Set(ParentIdHeader, ctx.SpanId.ToString(IdFormat));
+                    carrier.Set(ParentIdHeader, ctx.ParentId.Value.ToString(IdFormat));
                 if (ctx.Debug)
                     carrier.Set(DebugHeader, SampledTrue);
                 else
