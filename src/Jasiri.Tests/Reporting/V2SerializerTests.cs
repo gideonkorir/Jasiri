@@ -22,7 +22,7 @@ namespace Jasiri.Tests.Reporting
         [Fact]
         public void SerializerSerializesFullSpanCorrectly()
         {
-            var clock = ManualClock.FromUtcNow;
+            var clock = ManualClock.FromUtcNow();
 
             var tracer = new Tracer(new TraceOptions()
             {
@@ -95,7 +95,7 @@ namespace Jasiri.Tests.Reporting
         [Fact]
         public void SerializerIgnoresAbsentSpanKind()
         {
-            var clock = ManualClock.FromUtcNow;
+            var clock = ManualClock.FromUtcNow();
 
             var tracer = new Tracer(new TraceOptions()
             {

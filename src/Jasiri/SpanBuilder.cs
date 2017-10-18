@@ -118,6 +118,7 @@ namespace Jasiri
                 sampled = new SamplingStatus(true, null);
             else
                 sampled = tracer.Sampler.Sample(operationName, spanId);
+            stringTags = stringTags ?? new Dictionary<string, string>();
             stringTags.AddRange(sampled.Tags);
             return new SpanContext(spanId, spanId, null, false, sampled);
         }
@@ -148,7 +149,8 @@ namespace Jasiri
 
         Endpoint GetRemote()
         {
-            bool hasPort = intTags.TryGetValue(Tags.PeerPort, out var port);
+            int port = -1;
+            bool hasPort = intTags != null && intTags.TryGetValue(Tags.PeerPort, out port);
             int? portOverride = hasPort ? new int?(port) : null;
             return Ext.Build(stringTags, hasPort ? port : portOverride);
         }

@@ -26,7 +26,7 @@ namespace Jasiri.Tests
         public DateTimeOffset Now()
             => currentTime;
 
-        public static ManualClock FromUtcNow
+        public static ManualClock FromUtcNow()
             => new ManualClock(DateTimeOffset.UtcNow);
     }
 }
