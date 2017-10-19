@@ -12,13 +12,13 @@ namespace Jasiri.Reporting
     public class PeriodicReporter : IReporter
     {
         readonly ISender sender;
-        readonly Batch<ISpan> batch;
+        readonly Buffer<ISpan> batch;
         readonly PeriodicAsync periodicAsync;
         
         public PeriodicReporter(ISender sender, FlushOptions flushOptions)
         {
             this.sender = sender;
-            batch = new Batch<ISpan>(flushOptions.MaxBatchSize);
+            batch = new Buffer<ISpan>(flushOptions.MaxBufferSize);
             periodicAsync = new PeriodicAsync(FlushAsync, flushOptions.FlushInterval,flushOptions.CancellationToken);
             periodicAsync.Start(this);
         }
