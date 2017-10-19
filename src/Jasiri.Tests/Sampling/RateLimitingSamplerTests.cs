@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using Xunit;
+using Jasiri.Util;
 
 namespace Jasiri.Tests.Sampling
 {
@@ -12,11 +13,7 @@ namespace Jasiri.Tests.Sampling
         [Fact]
         public void RateLimiterAllowsMaxUnitsPerInterval()
         {
-            var sampler = new RateLimitingSampler(new Rate()
-            {
-                Units = 1,
-                Interval = TimeSpan.FromDays(1)
-            });
+            var sampler = new RateLimitingSampler(new RateLimiter(1, TimeSpan.FromDays(1)));
             Thread.Sleep(500); //give us time to init
             using (sampler)
             {
@@ -28,18 +25,14 @@ namespace Jasiri.Tests.Sampling
         [Fact]
         public void RateLimiterSetsCorrectTags()
         {
-            var rate = new Rate()
-            {
-                Units = 1,
-                Interval = TimeSpan.FromDays(1)
-            };
-            var sampler = new RateLimitingSampler(rate);
+            var rateLimiter = new RateLimiter(1, TimeSpan.FromDays(1));
+            var sampler = new RateLimitingSampler(rateLimiter);
             Thread.Sleep(20);
             using (sampler)
             {
                 var sample = sampler.Sample("op", 56);
                 Assert.Equal("ratelimiting", sample.Tags["sampler"]);
-                Assert.Equal(rate.ToString(), sample.Tags["sampler-arg"]);
+                Assert.Equal(rateLimiter.ToString(), sample.Tags["sampler-arg"]);
             }
         }
     }
