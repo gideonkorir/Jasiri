@@ -7,7 +7,7 @@ This is an [OpenTracing](http://opentracing.io/) implementation for [Zipkin](htt
 
 ```
     var sender = new HttpZipkinTraceSender(
-        new ZipkinApi("http://localhost:9411/api/v2/span", new HttpClient())
+        ZipkinHttpApi.V2("http://localhost:9411"), new HttpClient()
         );
     var reporter = new PeriodicReporter(sender, new FlushOptions()
     {
