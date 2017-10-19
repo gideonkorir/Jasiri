@@ -17,7 +17,7 @@ namespace Jasiri.Tests.Sampling
                 Units = 1,
                 Interval = TimeSpan.FromDays(1)
             });
-            Thread.Sleep(20); //give us time to init
+            Thread.Sleep(500); //give us time to init
             using (sampler)
             {
                 Assert.True(sampler.Sample("op", 5));
