@@ -2,49 +2,31 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using Jasiri.Util;
 
 namespace Jasiri.Sampling
 {
-    public class Rate
-    {
-        public uint Units { get; set; }
-        public TimeSpan Interval { get; set; }
-
-        public override string ToString()
-            => $"{Units} units in {Interval.TotalMilliseconds} ms";
-    }
     public class RateLimitingSampler : ISampler, IDisposable
     {
-        readonly Rate rate;
-        readonly Timer timer;
+        readonly RateLimiter rateLimiter;
         readonly Dictionary<string, string> tags;
 
-        long units = 0;
-
-        public RateLimitingSampler(Rate rate)
+        public RateLimitingSampler(RateLimiter rateLimiter)
         {
-            this.rate = rate ?? throw new ArgumentNullException(nameof(rate));
+            this.rateLimiter = rateLimiter ?? throw new ArgumentNullException(nameof(rateLimiter));
             tags = new Dictionary<string, string>()
             {
                 ["sampler"] = "ratelimiting",
-                ["sampler-arg"] = rate.ToString()
+                ["sampler-arg"] = rateLimiter.ToString()
             };
-            timer = new Timer(AddUnits, null, TimeSpan.Zero, Timeout.InfiniteTimeSpan);
-        }
-
-        void AddUnits(object arg)
-        {
-            Interlocked.Exchange(ref units, rate.Units);
-            timer.Change(rate.Interval, Timeout.InfiniteTimeSpan);
         }
 
         public SamplingStatus Sample(string operationName, ulong traceId)
         {
-            var newValue = Interlocked.Decrement(ref units);
-            return new SamplingStatus(newValue >= 0, tags);
+            return new SamplingStatus(rateLimiter.Check(), tags);
         }
 
         public void Dispose()
-            => timer.Dispose();
+            => rateLimiter.Dispose();
     }
 }
