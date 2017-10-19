@@ -2,6 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>Jasiri</PackageId>
+    <PackageVersion>0.1.0</PackageVersion>
+    <Title>OpenTracing compatible Zipkin client. Uses Zipkin V2 api</Title>
+    <Authors>Gideon Korir</Authors>
+    <Description>
+      OpenTracing compatible Zipkin client. Uses Zipkin V2 API to send spans to zipkin
+    </Description>
+    <Copyright>Gideon Korir</Copyright>
+    <PackageProjectUrl>https://github.com/gideonkorir/Jasiri</PackageProjectUrl>
+    <PackageTags>OpenTracing, Zipkin, OpenZipkin, Tracing</PackageTags>
+    <RepositoryUrl>https://github.com/gideonkorir/Jasiri</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
