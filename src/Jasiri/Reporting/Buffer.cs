@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jasiri.Reporting
 {
-    public class Batch<T>
+    public class Buffer<T>
     {
         static readonly T[] Empty = new T[0];
         public int MaxSize { get; }
@@ -16,7 +16,7 @@ namespace Jasiri.Reporting
         readonly int maxIndex = 0;
         int index = -1;
 
-        public Batch(int maxSize)
+        public Buffer(int maxSize)
         {
             MaxSize = maxSize;
             items = new T[maxSize];

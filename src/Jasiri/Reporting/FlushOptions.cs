@@ -7,7 +7,7 @@ namespace Jasiri.Reporting
 {
     public class FlushOptions
     {
-        public int MaxBatchSize { get; set; }
+        public int MaxBufferSize { get; set; }
         public TimeSpan FlushInterval { get; set; }
         public CancellationToken CancellationToken { get; set; }
     }

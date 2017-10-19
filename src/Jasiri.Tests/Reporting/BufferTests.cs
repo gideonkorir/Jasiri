@@ -8,12 +8,12 @@ using Xunit;
 
 namespace Jasiri.Tests.Reporting
 {
-    public class BatchTests
+    public class BufferTests
     {
         [Fact]
         public void BatchDropsMessagesWhenMaxSizeIsReached()
         {
-            var batch = new Batch<int>(4);
+            var batch = new Buffer<int>(4);
             batch.Add(1);
             Assert.Equal(1, batch.Size);
             batch.Add(2);
@@ -32,7 +32,7 @@ namespace Jasiri.Tests.Reporting
         [Fact]
         public void GetAndClearRemovesItemsFromBatch()
         {
-            var batch = new Batch<int>(3);
+            var batch = new Buffer<int>(3);
             batch.Add(1);
             batch.Add(2);
             batch.Add(3);
@@ -47,7 +47,7 @@ namespace Jasiri.Tests.Reporting
         [Fact]
         public void GetAndClearReturnsCorrectSubset()
         {
-            var batch = new Batch<int>(15);
+            var batch = new Buffer<int>(15);
             batch.Add(-8);
             batch.Add(23);
             batch.Add(45);
@@ -65,7 +65,7 @@ namespace Jasiri.Tests.Reporting
         [Fact]
         public void BatchMultiThreadAdd()
         {
-            var batch = new Batch<int>(5);
+            var batch = new Buffer<int>(5);
             var items = Enumerable.Range(0, 100);
             Parallel.ForEach(items, (c) => batch.Add(c));
             Assert.Equal(5, batch.Size);

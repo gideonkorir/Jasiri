@@ -11,7 +11,7 @@ This is an [OpenTracing](http://opentracing.io/) implementation for [Zipkin](htt
         );
     var reporter = new PeriodicReporter(sender, new FlushOptions()
     {
-        MaxBatchSize = 100,
+        MaxBufferSize = 100,
         FlushInterval = TimeSpan.FromSeconds(1),
         CancellationToken = CancellationToken.None
     });
