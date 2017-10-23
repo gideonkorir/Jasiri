@@ -20,7 +20,7 @@ namespace Jasiri.Reporting
 
         public static ZipkinHttpApi V2(Uri hostUri, ISerializer serializer = null)
         {
-            var apiUri = new Uri(hostUri, "api/v2/span");
+            var apiUri = new Uri(hostUri, "api/v2/spans");
             serializer = serializer ?? new V2JsonSerializer();
             return new ZipkinHttpApi(apiUri, serializer);
         }
