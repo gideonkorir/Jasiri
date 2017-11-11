@@ -85,7 +85,10 @@ namespace Jasiri
         public IZipkinSpan Finish(DateTimeOffset timeStamp)
         {
             if (!finishTimeStamp.HasValue)
+            {
                 finishTimeStamp = timeStamp;
+                zipkinTracer.Report(this);
+            }
             return this;
         }
 

@@ -18,5 +18,7 @@ namespace Jasiri
         IZipkinSpan NewSpan(string operationName, bool forceNew = false);
 
         IZipkinSpan NewSpan(string operationName, ZipkinTraceContext parentContext);
+
+        void Report(IZipkinSpan span);
     }
 }

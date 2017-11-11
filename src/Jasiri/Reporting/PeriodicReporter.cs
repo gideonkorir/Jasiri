@@ -31,9 +31,10 @@ namespace Jasiri.Reporting
                     return;
                 await sender.SendAsync(items, cancellationToken);
             }
-            catch(Exception)
+            catch(Exception e)
             {
                 //log and report
+                System.Diagnostics.Debug.WriteLine(e.Message);
             }
         }
     }

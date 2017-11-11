@@ -1,4 +1,5 @@
 ﻿using Jasiri.Propagation;
+using Jasiri.Reporting;
 using Jasiri.Sampling;
 using System;
 using System.Collections.Generic;
@@ -7,11 +8,12 @@ using System.Threading;
 
 namespace Jasiri
 {
-    class ZipkinTracer : IZipkinTracer
+    public class ZipkinTracer : IZipkinTracer
     {
         readonly ISampler sampler;
         readonly Func<ulong> newId;
         readonly bool use128bitTraceId;
+        readonly IReporter reporter;
 
         int noOp = 0;
 
@@ -32,6 +34,7 @@ namespace Jasiri
             Clock = options.Clock;
             use128bitTraceId = options.Use128bitTraceId;
             PropagationRegistry = options.PropagationRegistry;
+            this.reporter = options.Reporter;
         }
 
         public bool NoOp
@@ -87,6 +90,15 @@ namespace Jasiri
                     span.Tag(tag.Key, tag.Value);
             }
             return span;            
+        }
+
+        public void Report(IZipkinSpan span)
+        {
+            if (span == null)
+                return;
+            if (!span.Context.Sampled)
+                return;
+            reporter.Report(span);
         }
     }
 }

@@ -27,7 +27,7 @@ namespace Jasiri.OpenTracing
             if(carrier is ITextMap map && zipkinTracer.PropagationRegistry.TryGet(format.Name, out var propagator))
             {
                 var context = propagator.Extract(Adapt.ToPropagatorMap(map));
-                return new SpanContext(context);
+                return context == null ? null : new SpanContext(context);
             }
             return null;
         }

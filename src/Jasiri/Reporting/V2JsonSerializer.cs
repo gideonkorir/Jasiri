@@ -40,11 +40,7 @@ namespace Jasiri.Reporting
             writer.WriteValue(span.Context.ParentId?.ToString("x16"));
 
             //set span id if specified
-            if (span.Kind.HasValue)
-            {
-                writer.WritePropertyName("kind");
-                writer.WriteValue(span.Kind);
-            }
+            Write(writer, span.Kind);
             writer.WritePropertyName("timestamp");
             writer.WriteValue(ZipkinUtil.UnixStartMs(span));
             writer.WritePropertyName("duration");
@@ -60,6 +56,24 @@ namespace Jasiri.Reporting
             Write(writer, span.Tags);
 
             writer.WriteEndObject();
+        }
+
+        void Write(JsonWriter writer, ZipkinSpanKind? spanKind)
+        {
+            if (spanKind == null)
+                return;
+            string kind = "CLIENT";
+            switch(spanKind.Value)
+            {
+                case ZipkinSpanKind.SERVER:
+                    kind = "SERVER"; break;
+                case ZipkinSpanKind.PRODUCER:
+                    kind = "PRODUCER"; break;
+                case ZipkinSpanKind.CONSUMER:
+                    kind = "CONSUMER"; break;
+            }
+            writer.WritePropertyName("kind");
+            writer.WriteValue(kind);
         }
 
         void Write(JsonWriter writer, string name, Endpoint endpoint)
