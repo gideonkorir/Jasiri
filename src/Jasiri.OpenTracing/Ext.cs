@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 
-namespace Jasiri
+namespace Jasiri.OpenTracing
 {
     static class Ext
     {

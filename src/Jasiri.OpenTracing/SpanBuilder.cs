@@ -3,11 +3,11 @@ using System;
 using System.Collections.Generic;
 using Jasiri.Sampling;
 
-namespace Jasiri
+namespace Jasiri.OpenTracing
 {
     class SpanBuilder : ISpanBuilder
     {
-        readonly Tracer tracer;
+        readonly IZipkinTracer tracer;
         readonly string operationName;
 
         DateTimeOffset? startTimestamp;
@@ -20,12 +20,12 @@ namespace Jasiri
         Dictionary<string, string> stringTags = null;
         
 
-        public SpanBuilder(Tracer tracer, string operationName)
+        public SpanBuilder(Jasiri.IZipkinTracer tracer, string operationName)
         {
             this.tracer = tracer ?? throw new ArgumentNullException(nameof(tracer));
             this.operationName = operationName;
-            if (Span.Current != null)
-                AddReference(References.ChildOf, Span.Current.Context);
+            if (tracer.ActiveSpan != null)
+                AddReference(References.ChildOf, new SpanContext(tracer.ActiveSpan.Context));
         }
 
         public ISpanBuilder AddReference(string referenceType, ISpanContext referencedContext)
@@ -94,53 +94,47 @@ namespace Jasiri
 
         public ISpan Start()
         {
-            var spanKind = GetSpanKind();
-            var context = GetOrCreateContext();
-            CombineTags();
-            var span = new Span(operationName, context, spanKind, startTimestamp ?? tracer.Clock(),
-                tracer.HostEndpoint, GetRemote(), stringTags, tracer);
-            Span.Current = span;
-            return span;
-        }
-
-        SpanContext GetOrCreateContext()
-        {
-            var spanId = tracer.NewId();
-            SpanContext parentContext = null;
+            IZipkinSpan span = null;
             if (references != null && references.Count > 0)
-                parentContext = references[0].Context as SpanContext;
-
-            if (parentContext != null)
-                return parentContext.NewChild(spanId);
-
-            SamplingStatus sampled = SamplingStatus.NotSampled;
-            if (intTags != null && intTags.TryGetValue(Tags.SamplingPriority, out int value) && value > 0)
-                sampled = new SamplingStatus(true, null);
+            {
+                var parentRef = references[0].Context as SpanContext;
+                if (parentRef != null)
+                    span = tracer.NewSpan(operationName, parentRef.TraceContext);
+                else
+                    span = tracer.NewSpan(operationName);
+            }
             else
-                sampled = tracer.Sampler.Sample(operationName, spanId);
-            stringTags = stringTags ?? new Dictionary<string, string>();
-            stringTags.AddRange(sampled.Tags);
-            return new SpanContext(spanId, spanId, null, false, sampled);
+            {
+                span = tracer.NewSpan(operationName);
+            }
+            span.Kind = GetSpanKind();
+            span.RemoteEndpoint = GetRemote();
+            CombineTags(span);
+            if (startTimestamp.HasValue)
+                span.Start(startTimestamp.Value);
+            else
+                span.Start();
+            return new Span(span);
         }
 
-        string GetSpanKind()
+        ZipkinSpanKind? GetSpanKind()
         {
-            string zipkinSpanKind = SpanKind.ABSENT;
+            ZipkinSpanKind? zipkinSpanKind = null;
             if(stringTags != null && stringTags.TryGetValue(Tags.SpanKind, out var spanKind) && !string.IsNullOrWhiteSpace(spanKind))
             {
                 switch(spanKind)
                 {
                     case Tags.SpanKindClient:
-                        zipkinSpanKind = SpanKind.CLIENT;
+                        zipkinSpanKind = ZipkinSpanKind.CLIENT;
                         break;
                     case Tags.SpanKindServer:
-                        zipkinSpanKind = SpanKind.SERVER;
+                        zipkinSpanKind = ZipkinSpanKind.SERVER;
                         break;
                     case Tags.SpanKindProducer:
-                        zipkinSpanKind = SpanKind.PRODUCER;
+                        zipkinSpanKind = ZipkinSpanKind.PRODUCER;
                         break;
                     case Tags.SpanKindConsumer:
-                        zipkinSpanKind = SpanKind.CONSUMER;
+                        zipkinSpanKind = ZipkinSpanKind.CONSUMER;
                         break;
                 }
             }
@@ -155,24 +149,27 @@ namespace Jasiri
             return Ext.Build(stringTags, hasPort ? port : portOverride);
         }
 
-        void CombineTags()
+        void CombineTags(IZipkinSpan span)
         {
-            stringTags = stringTags ?? new Dictionary<string, string>();
-
             if (intTags != null)
             {
                 foreach (var kvp in intTags)
-                    stringTags.Add(kvp.Key, kvp.Value.ToString());
+                    span.Tag(kvp.Key, kvp.Value.ToString());
             }
             if (boolTags != null)
             {
                 foreach (var kvp in boolTags)
-                    stringTags.Add(kvp.Key, kvp.Value.ToString());
+                    span.Tag(kvp.Key, kvp.Value.ToString());
             }
             if(doubleTags != null)
             {
                 foreach (var kvp in doubleTags)
-                    stringTags.Add(kvp.Key, kvp.Value.ToString());
+                    span.Tag(kvp.Key, kvp.Value.ToString());
+            }
+            if(stringTags != null)
+            {
+                foreach (var kvp in stringTags)
+                    span.Tag(kvp.Key, kvp.Value);
             }
         }
     }

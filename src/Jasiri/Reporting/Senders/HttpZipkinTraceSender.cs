@@ -1,5 +1,4 @@
-﻿using OpenTracing;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
@@ -19,7 +18,7 @@ namespace Jasiri.Reporting.Senders
             this.client = client ?? throw new ArgumentNullException(nameof(client));
         }
 
-        public async Task SendAsync(IReadOnlyList<ISpan> spans, CancellationToken cancellationToken)
+        public async Task SendAsync(IReadOnlyList<IZipkinSpan> spans, CancellationToken cancellationToken)
         {
             if (spans == null || spans.Count == 0)
                 return;

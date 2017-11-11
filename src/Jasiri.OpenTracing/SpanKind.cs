@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jasiri
+namespace Jasiri.OpenTracing
 {
     public static class SpanKind
     {

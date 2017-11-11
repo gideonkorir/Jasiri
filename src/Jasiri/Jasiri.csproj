@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <PackageReference Include="newtonsoft.json" Version="10.0.3" />
-    <PackageReference Include="opentracing" Version="0.10.0" />
   </ItemGroup>
 
 </Project>
