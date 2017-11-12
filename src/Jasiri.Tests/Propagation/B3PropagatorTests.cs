@@ -13,7 +13,7 @@ namespace Jasiri.Tests.Propagation
         {
             var propatagor = new B3Propagator();
             var map = new Dictionary<string, string>();
-            propatagor.Inject(new ZipkinTraceContext(1, 323423, 4343, false, true, false), new DictionaryPropagatorMap(map));
+            propatagor.Inject(new SpanContext(1, 323423, 4343, false, true, false), new DictionaryPropagatorMap(map));
             Assert.Equal(4, map.Count);
             Assert.Equal(1.ToString("x4"), map["X-B3-TraceId"]);
             Assert.Equal(323423.ToString("x4"), map["X-B3-SpanId"]);
@@ -26,7 +26,7 @@ namespace Jasiri.Tests.Propagation
         {
             var propatagor = new B3Propagator();
             var map = new Dictionary<string, string>();
-            propatagor.Inject(new ZipkinTraceContext(1, 323423, null, false, true, false), new DictionaryPropagatorMap(map));
+            propatagor.Inject(new SpanContext(1, 323423, null, false, true, false), new DictionaryPropagatorMap(map));
             Assert.False(map.TryGetValue("X-B3-ParentSpanId", out var _));
         }
 
@@ -35,7 +35,7 @@ namespace Jasiri.Tests.Propagation
         {
             var propatagor = new B3Propagator();
             var map = new Dictionary<string, string>();
-            propatagor.Inject(new ZipkinTraceContext(1, 323423, 4343, true, true, false), new DictionaryPropagatorMap(map));
+            propatagor.Inject(new SpanContext(1, 323423, 4343, true, true, false), new DictionaryPropagatorMap(map));
             Assert.False(map.TryGetValue("X-B3-Sampled", out var _));
             Assert.Equal("1", map["X-B3-Flags"]);
         }
@@ -45,12 +45,12 @@ namespace Jasiri.Tests.Propagation
         {
             var propatagor = new B3Propagator();
             var map = new Dictionary<string, string>();
-            propatagor.Inject(new ZipkinTraceContext(1, 323423, 4343, true, false, false), new DictionaryPropagatorMap(map));
+            propatagor.Inject(new SpanContext(1, 323423, 4343, true, false, false), new DictionaryPropagatorMap(map));
             Assert.Equal("1", map["X-B3-Sampled"]);
 
             map.Clear();
 
-            propatagor.Inject(new ZipkinTraceContext(1, 344332, 98, false, false, false), new DictionaryPropagatorMap(map));
+            propatagor.Inject(new SpanContext(1, 344332, 98, false, false, false), new DictionaryPropagatorMap(map));
             Assert.Equal("0", map["X-B3-Sampled"]);
         }
 
@@ -59,9 +59,9 @@ namespace Jasiri.Tests.Propagation
         {
             var propatagor = new B3Propagator();
             var map = new Dictionary<string, string>();
-            propatagor.Inject(new ZipkinTraceContext(1, 323423, 4343, true, false, false), new DictionaryPropagatorMap(map));
+            propatagor.Inject(new SpanContext(1, 323423, 4343, true, false, false), new DictionaryPropagatorMap(map));
 
-            var context = propatagor.Extract(new DictionaryPropagatorMap(map)) as ZipkinTraceContext;
+            var context = propatagor.Extract(new DictionaryPropagatorMap(map)) as SpanContext;
             Assert.NotNull(context);
 
             Assert.Equal<ulong>(1, context.TraceId.TraceIdLow);
@@ -78,9 +78,9 @@ namespace Jasiri.Tests.Propagation
         {
             var propatagor = new B3Propagator();
             var map = new Dictionary<string, string>();
-            propatagor.Inject(new ZipkinTraceContext(189879, 46764, null, true, false, false), new DictionaryPropagatorMap(map));
+            propatagor.Inject(new SpanContext(189879, 46764, null, true, false, false), new DictionaryPropagatorMap(map));
 
-            var context = propatagor.Extract(new DictionaryPropagatorMap(map)) as ZipkinTraceContext;
+            var context = propatagor.Extract(new DictionaryPropagatorMap(map)) as SpanContext;
             Assert.NotNull(context);
 
             Assert.Equal<ulong>(189879, context.TraceId.TraceIdLow);
@@ -96,9 +96,9 @@ namespace Jasiri.Tests.Propagation
         {
             var propatagor = new B3Propagator();
             var map = new Dictionary<string, string>();
-            propatagor.Inject(new ZipkinTraceContext(67, 46764, null, true, true, false), new DictionaryPropagatorMap(map));
+            propatagor.Inject(new SpanContext(67, 46764, null, true, true, false), new DictionaryPropagatorMap(map));
 
-            var context = propatagor.Extract(new DictionaryPropagatorMap(map)) as ZipkinTraceContext;
+            var context = propatagor.Extract(new DictionaryPropagatorMap(map)) as SpanContext;
             Assert.NotNull(context);
 
             Assert.Equal<ulong>(67, context.TraceId.TraceIdLow);

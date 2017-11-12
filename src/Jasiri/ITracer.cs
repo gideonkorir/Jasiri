@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jasiri
 {
-    public interface IZipkinTracer
+    public interface ITracer
     {
         Func<DateTimeOffset> Clock { get; }
 
@@ -17,7 +17,7 @@ namespace Jasiri
 
         IZipkinSpan NewSpan(string operationName, bool forceNew = false);
 
-        IZipkinSpan NewSpan(string operationName, ZipkinTraceContext parentContext);
+        IZipkinSpan NewSpan(string operationName, SpanContext parentContext);
 
         void Report(IZipkinSpan span);
     }

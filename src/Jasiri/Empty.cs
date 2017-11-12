@@ -25,7 +25,7 @@ namespace Jasiri
             return span;
         }
 
-        public static IZipkinSpan SetKind(this IZipkinSpan span, ZipkinSpanKind zipkinSpanKind)
+        public static IZipkinSpan SetKind(this IZipkinSpan span, SpanKind zipkinSpanKind)
         {
             span.Kind = zipkinSpanKind;
             return span;

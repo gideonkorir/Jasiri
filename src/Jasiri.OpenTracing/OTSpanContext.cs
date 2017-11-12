@@ -7,11 +7,11 @@ namespace Jasiri.OpenTracing
 {
     public class OTSpanContext : ISpanContext
     {
-        readonly ZipkinTraceContext traceContext;
+        readonly SpanContext traceContext;
 
-        internal ZipkinTraceContext TraceContext => traceContext;
+        internal SpanContext TraceContext => traceContext;
 
-        public OTSpanContext(ZipkinTraceContext traceContext)
+        public OTSpanContext(SpanContext traceContext)
         {
             this.traceContext = traceContext ?? throw new ArgumentNullException(nameof(traceContext));
         }
@@ -25,6 +25,6 @@ namespace Jasiri.OpenTracing
             => new OTSpanContext(traceContext.CreateChild(childSpanId));
 
         public OTSpanContext Join()
-            => traceContext.Shared ? this : new OTSpanContext(new ZipkinTraceContext(traceContext.TraceId, traceContext.SpanId, traceContext.ParentId, traceContext.Sampled, traceContext.Debug, true));
+            => traceContext.Shared ? this : new OTSpanContext(new SpanContext(traceContext.TraceId, traceContext.SpanId, traceContext.ParentId, traceContext.Sampled, traceContext.Debug, true));
     }
 }

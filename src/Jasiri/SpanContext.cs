@@ -4,9 +4,9 @@ using System.Text;
 
 namespace Jasiri
 {
-    public class ZipkinTraceContext
+    public class SpanContext
     {
-        public static readonly ZipkinTraceContext Empty = new ZipkinTraceContext(0, 0, null, false, false, false);
+        public static readonly SpanContext Empty = new SpanContext(0, 0, null, false, false, false);
 
         /// <summary>
         /// When non-zero this trace has 128bit identifiers
@@ -42,13 +42,13 @@ namespace Jasiri
         /// </summary>
         public bool Shared { get; }
 
-        public ZipkinTraceContext(ulong traceIdLow, ulong spanId, ulong? parentId, bool sampled, bool debug, bool shared)
+        public SpanContext(ulong traceIdLow, ulong spanId, ulong? parentId, bool sampled, bool debug, bool shared)
             : this(new TraceId(traceIdLow), spanId, parentId, sampled, debug, shared)
         {
 
         }
 
-        public ZipkinTraceContext(TraceId traceId, ulong spanId, ulong? parentId, bool sampled, bool debug, bool shared)
+        public SpanContext(TraceId traceId, ulong spanId, ulong? parentId, bool sampled, bool debug, bool shared)
         {
             TraceId = traceId;
             SpanId = spanId;
@@ -58,8 +58,8 @@ namespace Jasiri
             Debug = debug;
         }
 
-        public ZipkinTraceContext CreateChild(ulong spanId)
-            => new ZipkinTraceContext(TraceId, spanId, SpanId, Sampled, Debug, Shared);
+        public SpanContext CreateChild(ulong spanId)
+            => new SpanContext(TraceId, spanId, SpanId, Sampled, Debug, Shared);
 
         /// <summary>
         /// Create a copy with option to change a value
@@ -71,7 +71,7 @@ namespace Jasiri
         /// <param name="sampled"></param>
         /// <param name="shared"></param>
         /// <returns></returns>
-        public ZipkinTraceContext Copy(Optional<TraceId> traceId = default(Optional<TraceId>), 
+        public SpanContext Copy(Optional<TraceId> traceId = default(Optional<TraceId>), 
             Optional<ulong> spanId = default(Optional<ulong>), 
             Optional<ulong?> parentId = default(Optional<ulong?>), bool? sampled = null, bool? debug = null, bool? shared = null)
         {
@@ -81,7 +81,7 @@ namespace Jasiri
             sampled = sampled ?? Sampled;
             shared = shared ?? Shared;
             debug = debug ?? Debug;
-            return new ZipkinTraceContext(traceId.Value, spanId.Value, parentId.Value, sampled.Value, debug.Value, shared.Value);
+            return new SpanContext(traceId.Value, spanId.Value, parentId.Value, sampled.Value, debug.Value, shared.Value);
         }
     }
 }

@@ -4,9 +4,9 @@ using System.Text;
 
 namespace Jasiri
 {
-    class NullZipkinSpan : IZipkinSpan
+    class NullSpan : IZipkinSpan
     {
-        public static readonly NullZipkinSpan Instance = new NullZipkinSpan();
+        public static readonly NullSpan Instance = new NullSpan();
         public string Name
         {
             get => "null";
@@ -29,9 +29,9 @@ namespace Jasiri
                 //do nothing
             }
         }
-        public ZipkinSpanKind? Kind { get; set; }
+        public SpanKind? Kind { get; set; }
 
-        public ZipkinTraceContext Context => ZipkinTraceContext.Empty;
+        public SpanContext Context => SpanContext.Empty;
 
         public IReadOnlyDictionary<string, string> Tags => Empty.Tags;
 

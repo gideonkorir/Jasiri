@@ -10,11 +10,11 @@ using Jasiri.Util;
 
 namespace Jasiri.OpenTracing
 {
-    public class OTTracer : ITracer
+    public class OTTracer : global::OpenTracing.ITracer
     {
-        readonly IZipkinTracer zipkinTracer;
+        readonly ITracer zipkinTracer;
 
-        public OTTracer(IZipkinTracer zipkinTracer)
+        public OTTracer(ITracer zipkinTracer)
         {
             this.zipkinTracer = zipkinTracer ?? throw new ArgumentNullException(nameof(zipkinTracer));
         }

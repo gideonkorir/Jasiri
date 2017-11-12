@@ -5,9 +5,9 @@ using System.Threading;
 
 namespace Jasiri
 {
-    public class ZipkinSpan : IZipkinSpan
+    public class Span : IZipkinSpan
     {
-        readonly IZipkinTracer zipkinTracer;
+        readonly ITracer zipkinTracer;
         private DateTimeOffset? startTimeStamp, finishTimeStamp;
         private Dictionary<string, string> tags;
         private List<Annotation> annotations;
@@ -23,15 +23,15 @@ namespace Jasiri
 
         public Endpoint RemoteEndpoint { get; set; }
 
-        public ZipkinSpanKind? Kind { get; set; }
+        public SpanKind? Kind { get; set; }
 
-        public ZipkinTraceContext Context { get; }
+        public SpanContext Context { get; }
 
         public IReadOnlyDictionary<string, string> Tags => tags ?? Empty.Tags;
 
         public IReadOnlyList<Annotation> Annotations => annotations ?? Empty.Annotations;
 
-        public ZipkinSpan(ZipkinTraceContext context, string name, IZipkinTracer zipkinTracer)
+        public Span(SpanContext context, string name, ITracer zipkinTracer)
         {
             this.Context = context ?? throw new ArgumentNullException(nameof(context));
             this.zipkinTracer = zipkinTracer ?? throw new ArgumentNullException(nameof(zipkinTracer));
@@ -46,22 +46,22 @@ namespace Jasiri
             annotations = annotations ?? new List<Annotation>();
             if ("cs".Equals(value, StringComparison.OrdinalIgnoreCase))
             {
-                Kind = ZipkinSpanKind.CLIENT;
+                Kind = SpanKind.CLIENT;
                 startTimeStamp = timeStamp;
             }
             else if ("sr".Equals(value, StringComparison.OrdinalIgnoreCase))
             {
-                Kind = ZipkinSpanKind.SERVER;
+                Kind = SpanKind.SERVER;
                 startTimeStamp = timeStamp;
             }
             else if ("cr".Equals(value, StringComparison.OrdinalIgnoreCase))
             {
-                Kind = ZipkinSpanKind.CLIENT;
+                Kind = SpanKind.CLIENT;
                 Finish(timeStamp);
             }
             else if ("ss".Equals(value, StringComparison.Ordinal))
             {
-                Kind = ZipkinSpanKind.SERVER;
+                Kind = SpanKind.SERVER;
                 Finish(timeStamp);
             }
             else
@@ -117,9 +117,9 @@ namespace Jasiri
             return this;
         }
 
-        static readonly AsyncLocal<ZipkinSpan> current = new AsyncLocal<ZipkinSpan>();
+        static readonly AsyncLocal<Span> current = new AsyncLocal<Span>();
 
-        internal static ZipkinSpan Current
+        internal static Span Current
         {
             get => current.Value;
             set => current.Value = value;

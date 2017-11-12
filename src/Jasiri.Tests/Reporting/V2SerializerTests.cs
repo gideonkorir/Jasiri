@@ -23,7 +23,7 @@ namespace Jasiri.Tests.Reporting
         {
             var clock = ManualClock.FromUtcNow();
 
-            var tracer = new ZipkinTracer(new TraceOptions()
+            var tracer = new Tracer(new TraceOptions()
             {
                 Clock = clock.Now,
                 NewId = () => 45,
@@ -31,8 +31,8 @@ namespace Jasiri.Tests.Reporting
             });
             IZipkinSpan span = null;
             DateTimeOffset startSomething, completeSomething;
-            using (span = tracer.NewSpan("test", new ZipkinTraceContext(345, 2542, 3535, true, true, true))
-                .SetKind(ZipkinSpanKind.CLIENT)
+            using (span = tracer.NewSpan("test", new SpanContext(345, 2542, 3535, true, true, true))
+                .SetKind(SpanKind.CLIENT)
                 .Tag("tag1", 1)
                 .Tag("tag2", true)
                 .Tag("tag3", 4.5)
@@ -91,14 +91,14 @@ namespace Jasiri.Tests.Reporting
         {
             var clock = ManualClock.FromUtcNow();
 
-            var tracer = new ZipkinTracer(new TraceOptions()
+            var tracer = new Tracer(new TraceOptions()
             {
                 Clock = clock.Now,
                 NewId = () => 45,
                 Endpoint = new Endpoint("test-host", "127.0.0.1", 56)
             });
             IZipkinSpan span = null;
-            using (span = tracer.NewSpan("test", new ZipkinTraceContext(345, 2542, 3535, true, false, false))
+            using (span = tracer.NewSpan("test", new SpanContext(345, 2542, 3535, true, false, false))
                 .Tag("tag1", 1)
                 .Tag("tag2", true)
                 .Tag("tag3", 4.5)

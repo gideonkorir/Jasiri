@@ -17,7 +17,7 @@ namespace Jasiri.Propagation
         private const string SampledTrue = "1";
         private const string SampledFalse = "0";
 
-        public ZipkinTraceContext Extract(IPropagatorMap propagatorMap)
+        public SpanContext Extract(IPropagatorMap propagatorMap)
         {
             if (propagatorMap == null)
                 throw new ArgumentNullException(nameof(propagatorMap));
@@ -52,7 +52,7 @@ namespace Jasiri.Propagation
             }
             if (traceId == null || spanId == null)
                 return null;
-            return new ZipkinTraceContext(traceId.Value,
+            return new SpanContext(traceId.Value,
                 spanId.Value,
                 parentId,
                 sampled,
@@ -60,7 +60,7 @@ namespace Jasiri.Propagation
                 shared: false);
         }
 
-        public void Inject(ZipkinTraceContext spanContext, IPropagatorMap propagatorMap)
+        public void Inject(SpanContext spanContext, IPropagatorMap propagatorMap)
         {
                 propagatorMap[TraceIdHeader] = spanContext.TraceId.ToString();
                 propagatorMap[SpanIdHeader] = spanContext.SpanId.ToString(IdFormat);

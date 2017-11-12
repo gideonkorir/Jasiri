@@ -7,7 +7,7 @@ namespace Jasiri.OpenTracing
 {
     class SpanBuilder : ISpanBuilder
     {
-        readonly IZipkinTracer tracer;
+        readonly ITracer tracer;
         readonly string operationName;
 
         DateTimeOffset? startTimestamp;
@@ -20,7 +20,7 @@ namespace Jasiri.OpenTracing
         Dictionary<string, string> stringTags = null;
         
 
-        public SpanBuilder(Jasiri.IZipkinTracer tracer, string operationName)
+        public SpanBuilder(Jasiri.ITracer tracer, string operationName)
         {
             this.tracer = tracer ?? throw new ArgumentNullException(nameof(tracer));
             this.operationName = operationName;
@@ -117,24 +117,24 @@ namespace Jasiri.OpenTracing
             return new OTSpan(span);
         }
 
-        ZipkinSpanKind? GetSpanKind()
+        SpanKind? GetSpanKind()
         {
-            ZipkinSpanKind? zipkinSpanKind = null;
+            SpanKind? zipkinSpanKind = null;
             if(stringTags != null && stringTags.TryGetValue(Tags.SpanKind, out var spanKind) && !string.IsNullOrWhiteSpace(spanKind))
             {
                 switch(spanKind)
                 {
                     case Tags.SpanKindClient:
-                        zipkinSpanKind = ZipkinSpanKind.CLIENT;
+                        zipkinSpanKind = SpanKind.CLIENT;
                         break;
                     case Tags.SpanKindServer:
-                        zipkinSpanKind = ZipkinSpanKind.SERVER;
+                        zipkinSpanKind = SpanKind.SERVER;
                         break;
                     case Tags.SpanKindProducer:
-                        zipkinSpanKind = ZipkinSpanKind.PRODUCER;
+                        zipkinSpanKind = SpanKind.PRODUCER;
                         break;
                     case Tags.SpanKindConsumer:
-                        zipkinSpanKind = ZipkinSpanKind.CONSUMER;
+                        zipkinSpanKind = SpanKind.CONSUMER;
                         break;
                 }
             }

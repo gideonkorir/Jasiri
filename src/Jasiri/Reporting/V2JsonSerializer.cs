@@ -58,18 +58,18 @@ namespace Jasiri.Reporting
             writer.WriteEndObject();
         }
 
-        void Write(JsonWriter writer, ZipkinSpanKind? spanKind)
+        void Write(JsonWriter writer, SpanKind? spanKind)
         {
             if (spanKind == null)
                 return;
             string kind = "CLIENT";
             switch(spanKind.Value)
             {
-                case ZipkinSpanKind.SERVER:
+                case SpanKind.SERVER:
                     kind = "SERVER"; break;
-                case ZipkinSpanKind.PRODUCER:
+                case SpanKind.PRODUCER:
                     kind = "PRODUCER"; break;
-                case ZipkinSpanKind.CONSUMER:
+                case SpanKind.CONSUMER:
                     kind = "CONSUMER"; break;
             }
             writer.WritePropertyName("kind");

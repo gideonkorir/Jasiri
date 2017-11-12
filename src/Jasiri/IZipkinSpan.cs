@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Jasiri
 {
-    public enum ZipkinSpanKind
+    public enum SpanKind
     {
         CLIENT,
         SERVER,
@@ -44,12 +44,12 @@ namespace Jasiri
         /// <summary>
         /// Gets or sets the kind of server.
         /// </summary>
-        ZipkinSpanKind? Kind { get; set; }
+        SpanKind? Kind { get; set; }
 
         /// <summary>
         /// The context associated with this span
         /// </summary>
-        ZipkinTraceContext Context { get; }
+        SpanContext Context { get; }
 
         /// <summary>
         /// Returns map of tags set on the span

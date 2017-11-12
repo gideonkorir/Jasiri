@@ -11,7 +11,7 @@ namespace Jasiri.OpenTracing.Tests
         [Fact]
         public void SpanBuilderReturnsSpanWithNonNullContext()
         {
-            var tracer = new OTTracer(new ZipkinTracer());
+            var tracer = new OTTracer(new Tracer());
             using (var span = tracer.BuildSpan("test").Start())
             {
                 Assert.NotNull(span.Context);
@@ -21,8 +21,8 @@ namespace Jasiri.OpenTracing.Tests
         [Fact]
         public void SpanBuilderCreatesChildContextWhenSupplied()
         {
-            var tracer = new OTTracer(new ZipkinTracer());
-            var parentCtx = new OTSpanContext(new ZipkinTraceContext(3343, 131, 23, true, true, true));
+            var tracer = new OTTracer(new Tracer());
+            var parentCtx = new OTSpanContext(new SpanContext(3343, 131, 23, true, true, true));
             using (var span = tracer.BuildSpan("test").AsChildOf(parentCtx).Start())
             {
                 var ctx = (span.Context as OTSpanContext).TraceContext;
@@ -35,8 +35,8 @@ namespace Jasiri.OpenTracing.Tests
         [Fact]
         public void SpanBuilderCreatesFollowsContextWhenSupplied()
         {
-            var tracer = new OTTracer(new ZipkinTracer());
-            var parentCtx = new OTSpanContext(new ZipkinTraceContext(3343, 131, 23, true, true, true));
+            var tracer = new OTTracer(new Tracer());
+            var parentCtx = new OTSpanContext(new SpanContext(3343, 131, 23, true, true, true));
             using (var span = tracer.BuildSpan("test").FollowsFrom(parentCtx).Start())
             {
                 var ctx = (span.Context as OTSpanContext).TraceContext;
@@ -50,7 +50,7 @@ namespace Jasiri.OpenTracing.Tests
         public void SpanBuilderReturnsSpanWithStartTimeSet()
         {
             var clock = ManualClock.FromUtcNow();
-            var tracer = new OTTracer(new ZipkinTracer(new TraceOptions()
+            var tracer = new OTTracer(new Tracer(new TraceOptions()
             {
                 Clock = clock.Now
             }));
@@ -64,7 +64,7 @@ namespace Jasiri.OpenTracing.Tests
         [Fact]
         public void SpanBuilderReturnsSpanWithTagsSet()
         {
-            var tracer = new OTTracer(new ZipkinTracer());
+            var tracer = new OTTracer(new Tracer());
             using (var span = tracer.BuildSpan("test")
                 .WithTag("tag1", false)
                 .WithTag("tag2", 1)
@@ -83,7 +83,7 @@ namespace Jasiri.OpenTracing.Tests
         [Fact]
         public void SpanKindIsAbsentIfNotSetOnBuilder()
         {
-            var tracer = new OTTracer(new ZipkinTracer());
+            var tracer = new OTTracer(new Tracer());
             using (var span = tracer.BuildSpan("test").Start())
             {
                 Assert.Null((span as OTSpan).Wrapped.Kind);
@@ -97,9 +97,9 @@ namespace Jasiri.OpenTracing.Tests
         [InlineData(Tags.SpanKindProducer, SpanKind.PRODUCER)]
         public void SpanKindIsTranslatedWhenSet(string tagSpanKind, string zipkinSpanKind)
         {
-            var spanKind = Enum.Parse<ZipkinSpanKind>(zipkinSpanKind, true);
+            var spanKind = Enum.Parse<Jasiri.SpanKind>(zipkinSpanKind, true);
 
-            var tracer = new OTTracer(new ZipkinTracer());
+            var tracer = new OTTracer(new Tracer());
             using (var span = tracer.BuildSpan("test")
                 .WithTag(Tags.SpanKind, tagSpanKind)
                 .Start())

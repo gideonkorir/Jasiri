@@ -2,8 +2,8 @@
 {
     public interface IPropagator
     {
-        void Inject(ZipkinTraceContext spanContext, IPropagatorMap propagatorMap);
+        void Inject(SpanContext spanContext, IPropagatorMap propagatorMap);
 
-        ZipkinTraceContext Extract(IPropagatorMap propagatorMap);
+        SpanContext Extract(IPropagatorMap propagatorMap);
     }
 }

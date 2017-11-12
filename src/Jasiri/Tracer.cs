@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace Jasiri
 {
-    public class ZipkinTracer : IZipkinTracer
+    public class Tracer : ITracer
     {
         readonly ISampler sampler;
         readonly Func<ulong> newId;
@@ -23,9 +23,9 @@ namespace Jasiri
 
         public IPropagationRegistry PropagationRegistry { get; }
 
-        public IZipkinSpan ActiveSpan => ZipkinSpan.Current;
+        public IZipkinSpan ActiveSpan => Span.Current;
 
-        public ZipkinTracer(TraceOptions options = null)
+        public Tracer(TraceOptions options = null)
         {
             options = TraceOptions.ApplyDefaults(options ?? new TraceOptions());
             sampler = options.Sampler;
@@ -46,17 +46,17 @@ namespace Jasiri
         public IZipkinSpan NewSpan(string operationName, bool forceNew = false)
             => NewSpanImpl(operationName, forceNew ? null : ActiveSpan?.Context);
 
-        public IZipkinSpan NewSpan(string operationName, ZipkinTraceContext parentContext)
+        public IZipkinSpan NewSpan(string operationName, SpanContext parentContext)
         {
             if (parentContext == null)
                 throw new ArgumentNullException(nameof(parentContext));
             return NewSpanImpl(operationName, parentContext);
         }
 
-        IZipkinSpan NewSpanImpl(string operationName, ZipkinTraceContext parentContext = null)
+        IZipkinSpan NewSpanImpl(string operationName, SpanContext parentContext = null)
         {
             if (NoOp || (parentContext != null && !parentContext.Sampled))
-                return NullZipkinSpan.Instance;
+                return NullSpan.Instance;
 
             var id = newId();
             //if parentContext is specified use the parent's TraceId
@@ -78,8 +78,8 @@ namespace Jasiri
             {
                 sampled = parentContext.Sampled;
             }
-            var span = new ZipkinSpan(
-                new ZipkinTraceContext(traceId, id, parentId, sampled, false, false),
+            var span = new Span(
+                new SpanContext(traceId, id, parentId, sampled, false, false),
                 operationName,
                 this
                 );
