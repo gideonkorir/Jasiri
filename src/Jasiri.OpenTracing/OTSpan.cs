@@ -7,14 +7,14 @@ using System.Threading;
 
 namespace Jasiri.OpenTracing
 {
-    public class Span : ISpan
+    public class OTSpan : ISpan
     {
         bool disposed = false;
         readonly IZipkinSpan zipkinSpan;
         ISpanContext spanContext;
 
         public ISpanContext Context
-            => (spanContext ?? (spanContext = new SpanContext(zipkinSpan.Context)));
+            => (spanContext ?? (spanContext = new OTSpanContext(zipkinSpan.Context)));
 
         /// <summary>
         /// For testing purposes only
@@ -22,7 +22,7 @@ namespace Jasiri.OpenTracing
         internal IZipkinSpan Wrapped => zipkinSpan;
 
 
-        public Span(IZipkinSpan zipkinSpan)
+        public OTSpan(IZipkinSpan zipkinSpan)
         {
             this.zipkinSpan = zipkinSpan ?? throw new ArgumentNullException(nameof(zipkinSpan));
         }

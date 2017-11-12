@@ -25,7 +25,7 @@ namespace Jasiri.OpenTracing
             this.tracer = tracer ?? throw new ArgumentNullException(nameof(tracer));
             this.operationName = operationName;
             if (tracer.ActiveSpan != null)
-                AddReference(References.ChildOf, new SpanContext(tracer.ActiveSpan.Context));
+                AddReference(References.ChildOf, new OTSpanContext(tracer.ActiveSpan.Context));
         }
 
         public ISpanBuilder AddReference(string referenceType, ISpanContext referencedContext)
@@ -97,7 +97,7 @@ namespace Jasiri.OpenTracing
             IZipkinSpan span = null;
             if (references != null && references.Count > 0)
             {
-                var parentRef = references[0].Context as SpanContext;
+                var parentRef = references[0].Context as OTSpanContext;
                 if (parentRef != null)
                     span = tracer.NewSpan(operationName, parentRef.TraceContext);
                 else
@@ -114,7 +114,7 @@ namespace Jasiri.OpenTracing
                 span.Start(startTimestamp.Value);
             else
                 span.Start();
-            return new Span(span);
+            return new OTSpan(span);
         }
 
         ZipkinSpanKind? GetSpanKind()

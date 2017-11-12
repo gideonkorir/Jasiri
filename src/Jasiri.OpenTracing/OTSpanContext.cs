@@ -5,13 +5,13 @@ using System.Text;
 
 namespace Jasiri.OpenTracing
 {
-    public class SpanContext : ISpanContext
+    public class OTSpanContext : ISpanContext
     {
         readonly ZipkinTraceContext traceContext;
 
         internal ZipkinTraceContext TraceContext => traceContext;
 
-        public SpanContext(ZipkinTraceContext traceContext)
+        public OTSpanContext(ZipkinTraceContext traceContext)
         {
             this.traceContext = traceContext ?? throw new ArgumentNullException(nameof(traceContext));
         }
@@ -21,10 +21,10 @@ namespace Jasiri.OpenTracing
         public IEnumerable<KeyValuePair<string, string>> GetBaggageItems()
             => System.Linq.Enumerable.Empty<KeyValuePair<string, string>>();
 
-        public SpanContext NewChild(ulong childSpanId)
-            => new SpanContext(traceContext.CreateChild(childSpanId));
+        public OTSpanContext NewChild(ulong childSpanId)
+            => new OTSpanContext(traceContext.CreateChild(childSpanId));
 
-        public SpanContext Join()
-            => traceContext.Shared ? this : new SpanContext(new ZipkinTraceContext(traceContext.TraceId, traceContext.SpanId, traceContext.ParentId, traceContext.Sampled, traceContext.Debug, true));
+        public OTSpanContext Join()
+            => traceContext.Shared ? this : new OTSpanContext(new ZipkinTraceContext(traceContext.TraceId, traceContext.SpanId, traceContext.ParentId, traceContext.Sampled, traceContext.Debug, true));
     }
 }

@@ -15,7 +15,7 @@ namespace Jasiri.OpenTracing.Tests
         {
             var clock = ManualClock.FromUtcNow();
 
-            var tracer = new Tracer(new ZipkinTracer(new TraceOptions()
+            var tracer = new OTTracer(new ZipkinTracer(new TraceOptions()
             {
                 Clock = clock.Now,
                 NewId = () => 45,
@@ -33,7 +33,7 @@ namespace Jasiri.OpenTracing.Tests
                 .WithTag(Tags.PeerPort, 67)
                 .WithTag(Tags.PeerAddress, "http://server-host:67/")
                 .WithTag(Tags.PeerIpV4, "192.168.0.1")
-                .AsChildOf(new SpanContext(new ZipkinTraceContext(345, 2542, 3535, true, true, true)))
+                .AsChildOf(new OTSpanContext(new ZipkinTraceContext(345, 2542, 3535, true, true, true)))
                 .Start())
             {
                 clock.Move(TimeSpan.FromMilliseconds(10));
@@ -44,7 +44,7 @@ namespace Jasiri.OpenTracing.Tests
                 completeSomething = clock.Now();
                 span.Finish();
             }
-            var zSpan = span as Span;
+            var zSpan = span as OTSpan;
 
             var serializer = new V2JsonSerializer();
             var jobj = JArray.Parse(serializer.Serialize(new IZipkinSpan[] { zSpan.Wrapped }));
@@ -88,7 +88,7 @@ namespace Jasiri.OpenTracing.Tests
         {
             var clock = ManualClock.FromUtcNow();
 
-            var tracer = new Tracer(new ZipkinTracer(new TraceOptions()
+            var tracer = new OTTracer(new ZipkinTracer(new TraceOptions()
             {
                 Clock = clock.Now,
                 NewId = () => 45,
@@ -104,7 +104,7 @@ namespace Jasiri.OpenTracing.Tests
                 .WithTag(Tags.PeerPort, 67)
                 .WithTag(Tags.PeerAddress, "http://server-host:67/")
                 .WithTag(Tags.PeerIpV4, "192.168.0.1")
-                .AsChildOf(new SpanContext(new ZipkinTraceContext(345, 2542, 3535, true, false, false)))
+                .AsChildOf(new OTSpanContext(new ZipkinTraceContext(345, 2542, 3535, true, false, false)))
                 .Start())
             {
                 clock.Move(TimeSpan.FromMilliseconds(10));
@@ -113,7 +113,7 @@ namespace Jasiri.OpenTracing.Tests
                 span.Log("completed something");
                 span.Finish();
             }
-            var zSpan = span as Span;
+            var zSpan = span as OTSpan;
             var serializer = new V2JsonSerializer();
             var jobj = JArray.Parse(serializer.Serialize(new IZipkinSpan[] { zSpan.Wrapped }));
             var spanObj = jobj[0];

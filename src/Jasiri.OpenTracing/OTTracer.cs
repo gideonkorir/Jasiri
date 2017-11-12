@@ -10,11 +10,11 @@ using Jasiri.Util;
 
 namespace Jasiri.OpenTracing
 {
-    public class Tracer : ITracer
+    public class OTTracer : ITracer
     {
         readonly IZipkinTracer zipkinTracer;
 
-        public Tracer(IZipkinTracer zipkinTracer)
+        public OTTracer(IZipkinTracer zipkinTracer)
         {
             this.zipkinTracer = zipkinTracer ?? throw new ArgumentNullException(nameof(zipkinTracer));
         }
@@ -27,14 +27,14 @@ namespace Jasiri.OpenTracing
             if(carrier is ITextMap map && zipkinTracer.PropagationRegistry.TryGet(format.Name, out var propagator))
             {
                 var context = propagator.Extract(Adapt.ToPropagatorMap(map));
-                return context == null ? null : new SpanContext(context);
+                return context == null ? null : new OTSpanContext(context);
             }
             return null;
         }
 
         public void Inject<TCarrier>(ISpanContext spanContext, Format<TCarrier> format, TCarrier carrier)
         {
-            if(spanContext is SpanContext ctx && 
+            if(spanContext is OTSpanContext ctx && 
                 carrier is ITextMap map && zipkinTracer.PropagationRegistry.TryGet(format.Name, out var propagator))
             {
                 propagator.Inject(ctx.TraceContext, Adapt.ToPropagatorMap(map));
