@@ -42,5 +42,8 @@ namespace Jasiri.OpenTracing
             else
                 throw new NotImplementedException($"Propagator for format {format.Name} not found");
         }
+
+        public static OTTracer FromCurrentTracer()
+            => new OTTracer(Trace.Tracer);
     }
 }
