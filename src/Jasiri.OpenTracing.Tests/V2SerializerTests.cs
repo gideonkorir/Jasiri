@@ -4,63 +4,60 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
+using OpenTracing;
 
-namespace Jasiri.Tests.Reporting
+namespace Jasiri.OpenTracing.Tests
 {
     public class V2SerializerTests
     {
-        [Fact]
-        public void SerializerReturnsEmptyJsonArrayOnEmptyOrNullList()
-        {
-            var empty = "[]";
-            var serializer = new V2JsonSerializer();
-            Assert.Equal(empty, serializer.Serialize(null));
-            Assert.Equal(empty, serializer.Serialize(new IZipkinSpan[0]));
-        }
-
         [Fact]
         public void SerializerSerializesFullSpanCorrectly()
         {
             var clock = ManualClock.FromUtcNow();
 
-            var tracer = new ZipkinTracer(new TraceOptions()
+            var tracer = new Tracer(new ZipkinTracer(new TraceOptions()
             {
                 Clock = clock.Now,
                 NewId = () => 45,
                 Endpoint = new Endpoint("test-host", "127.0.0.1", 56)
-            });
-            IZipkinSpan span = null;
+            }));
+            ISpan span = null;
             DateTimeOffset startSomething, completeSomething;
-            using (span = tracer.NewSpan("test", new ZipkinTraceContext(345, 2542, 3535, true, true, true))
-                .SetKind(ZipkinSpanKind.CLIENT)
-                .Tag("tag1", 1)
-                .Tag("tag2", true)
-                .Tag("tag3", 4.5)
-                .Tag("tag4", "please work")
-                .SetRemoteEndpoint(new Endpoint("server-host", "192.168.0.1", 67))
-                .Tag("peer.address", "http://server-host:67/")
+            using (span = tracer.BuildSpan("test")
+                .WithTag(Tags.SpanKind, Tags.SpanKindClient)
+                .WithTag("tag1", 1)
+                .WithTag("tag2", true)
+                .WithTag("tag3", 4.5)
+                .WithTag("tag4", "please work")
+                .WithTag(Tags.PeerService, "server-host")
+                .WithTag(Tags.PeerPort, 67)
+                .WithTag(Tags.PeerAddress, "http://server-host:67/")
+                .WithTag(Tags.PeerIpV4, "192.168.0.1")
+                .AsChildOf(new SpanContext(new ZipkinTraceContext(345, 2542, 3535, true, true, true)))
                 .Start())
             {
                 clock.Move(TimeSpan.FromMilliseconds(10));
                 startSomething = clock.Now();
-                span.Annotate("starting something");
+                span.Log("starting something");
                 clock.Move(TimeSpan.FromMilliseconds(456));
-                span.Annotate("completed something");
+                span.Log("completed something");
                 completeSomething = clock.Now();
                 span.Finish();
             }
+            var zSpan = span as Span;
+
             var serializer = new V2JsonSerializer();
-            var jobj = JArray.Parse(serializer.Serialize(new IZipkinSpan[] { span }));
+            var jobj = JArray.Parse(serializer.Serialize(new IZipkinSpan[] { zSpan.Wrapped }));
             var spanObj = jobj[0];
             Assert.Equal(345.ToString("x16"), spanObj["traceId"].Value<string>());
             Assert.Equal(45.ToString("x16"), spanObj["id"].Value<string>());
             Assert.Equal(2542.ToString("x16"), spanObj["parentId"].Value<string>());
             Assert.Equal("test", spanObj["name"].Value<string>());
             Assert.Equal("CLIENT", spanObj["kind"].Value<string>());
-            Assert.Equal(ZipkinUtil.ToUnixMs(span.StartTimeStamp.Value), spanObj["timestamp"].Value<long>());
-            Assert.Equal(ZipkinUtil.DurationMs(span), spanObj["duration"].Value<long>());
-            Assert.Equal(span.Context.Debug, spanObj["debug"].Value<bool>());
-            Assert.Equal(span.Context.Shared, spanObj["shared"].Value<bool>());
+            Assert.Equal(ZipkinUtil.ToUnixMs(zSpan.Wrapped.StartTimeStamp.Value), spanObj["timestamp"].Value<long>());
+            Assert.Equal(ZipkinUtil.DurationMs(zSpan.Wrapped), spanObj["duration"].Value<long>());
+            Assert.Equal(zSpan.Wrapped.Context.Debug, spanObj["debug"].Value<bool>());
+            Assert.Equal(zSpan.Wrapped.Context.Shared, spanObj["shared"].Value<bool>());
 
             var endpoint = spanObj["localEndpoint"];
             Assert.Equal("test-host", endpoint["serviceName"]);
@@ -91,30 +88,34 @@ namespace Jasiri.Tests.Reporting
         {
             var clock = ManualClock.FromUtcNow();
 
-            var tracer = new ZipkinTracer(new TraceOptions()
+            var tracer = new Tracer(new ZipkinTracer(new TraceOptions()
             {
                 Clock = clock.Now,
                 NewId = () => 45,
                 Endpoint = new Endpoint("test-host", "127.0.0.1", 56)
-            });
-            IZipkinSpan span = null;
-            using (span = tracer.NewSpan("test", new ZipkinTraceContext(345, 2542, 3535, true, false, false))
-                .Tag("tag1", 1)
-                .Tag("tag2", true)
-                .Tag("tag3", 4.5)
-                .Tag("tag4", "please work")
-                .SetRemoteEndpoint(new Endpoint("server-host", "192.168.0.1", 67))
-                .Tag("peer.address", "http://server-host:67/")
+            }));
+            ISpan span = null;
+            using (span = tracer.BuildSpan("test")
+                .WithTag("tag1", 1)
+                .WithTag("tag2", true)
+                .WithTag("tag3", 4.5)
+                .WithTag("tag4", "please work")
+                .WithTag(Tags.PeerService, "server-host")
+                .WithTag(Tags.PeerPort, 67)
+                .WithTag(Tags.PeerAddress, "http://server-host:67/")
+                .WithTag(Tags.PeerIpV4, "192.168.0.1")
+                .AsChildOf(new SpanContext(new ZipkinTraceContext(345, 2542, 3535, true, false, false)))
                 .Start())
             {
                 clock.Move(TimeSpan.FromMilliseconds(10));
-                span.Annotate("starting something");
+                span.Log("starting something");
                 clock.Move(TimeSpan.FromMilliseconds(456));
-                span.Annotate("completed something");
+                span.Log("completed something");
                 span.Finish();
             }
+            var zSpan = span as Span;
             var serializer = new V2JsonSerializer();
-            var jobj = JArray.Parse(serializer.Serialize(new IZipkinSpan[] { span }));
+            var jobj = JArray.Parse(serializer.Serialize(new IZipkinSpan[] { zSpan.Wrapped }));
             var spanObj = jobj[0];
             Assert.Null(spanObj["kind"]);
         }

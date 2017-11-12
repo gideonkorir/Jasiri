@@ -14,7 +14,12 @@ namespace Jasiri.OpenTracing
         ISpanContext spanContext;
 
         public ISpanContext Context
-            => (spanContext != null ? spanContext : (spanContext = new SpanContext(zipkinSpan.Context)));
+            => (spanContext ?? (spanContext = new SpanContext(zipkinSpan.Context)));
+
+        /// <summary>
+        /// For testing purposes only
+        /// </summary>
+        internal IZipkinSpan Wrapped => zipkinSpan;
 
 
         public Span(IZipkinSpan zipkinSpan)

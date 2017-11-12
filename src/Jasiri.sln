@@ -8,6 +8,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jasiri.Tests", "Jasiri.Test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jasiri.OpenTracing", "Jasiri.OpenTracing\Jasiri.OpenTracing.csproj", "{3EAF5A54-DDFE-49A8-92AD-57F499A3B4AE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jasiri.OpenTracing.Tests", "Jasiri.OpenTracing.Tests\Jasiri.OpenTracing.Tests.csproj", "{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,6 +56,18 @@ Global
 		{3EAF5A54-DDFE-49A8-92AD-57F499A3B4AE}.Release|x64.Build.0 = Release|Any CPU
 		{3EAF5A54-DDFE-49A8-92AD-57F499A3B4AE}.Release|x86.ActiveCfg = Release|Any CPU
 		{3EAF5A54-DDFE-49A8-92AD-57F499A3B4AE}.Release|x86.Build.0 = Release|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Debug|x64.Build.0 = Debug|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Debug|x86.Build.0 = Debug|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Release|x64.ActiveCfg = Release|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Release|x64.Build.0 = Release|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Release|x86.ActiveCfg = Release|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

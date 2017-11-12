@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Jasiri.Reporting
 {
-    static class ZipkinUtil
+    public static class ZipkinUtil
     {
         static readonly long unixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
         const int TicksPerUs = 10;

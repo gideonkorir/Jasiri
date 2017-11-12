@@ -4,14 +4,14 @@ using System.Collections.Generic;
 using System.Text;
 using Xunit;
 
-namespace Jasiri.Tests
+namespace Jasiri.OpenTracing.Tests
 {
     public class SpanBuilderTests
     {
         [Fact]
         public void SpanBuilderReturnsSpanWithNonNullContext()
         {
-            var tracer = new Tracer();
+            var tracer = new Tracer(new ZipkinTracer());
             using (var span = tracer.BuildSpan("test").Start())
             {
                 Assert.NotNull(span.Context);
@@ -21,28 +21,28 @@ namespace Jasiri.Tests
         [Fact]
         public void SpanBuilderCreatesChildContextWhenSupplied()
         {
-            var tracer = new Tracer();
-            var parentCtx = new SpanContext(3343, 131, 23, true, true);
+            var tracer = new Tracer(new ZipkinTracer());
+            var parentCtx = new SpanContext(new ZipkinTraceContext(3343, 131, 23, true, true, true));
             using (var span = tracer.BuildSpan("test").AsChildOf(parentCtx).Start())
             {
-                var ctx = span.Context as SpanContext;
-                Assert.Equal<ulong>(parentCtx.TraceId, ctx.TraceId);
-                Assert.Equal<ulong>(parentCtx.SpanId, ctx.ParentId.Value);
-                Assert.Equal(parentCtx.Sampled, ctx.Sampled);
+                var ctx = (span.Context as SpanContext).TraceContext;
+                Assert.Equal(parentCtx.TraceContext.TraceId, ctx.TraceId);
+                Assert.Equal<ulong>(parentCtx.TraceContext.SpanId, ctx.ParentId.Value);
+                Assert.Equal(parentCtx.TraceContext.Sampled, ctx.Sampled);
             }
         }
 
         [Fact]
         public void SpanBuilderCreatesFollowsContextWhenSupplied()
         {
-            var tracer = new Tracer();
-            var parentCtx = new SpanContext(3343, 131, 23, true, true);
+            var tracer = new Tracer(new ZipkinTracer());
+            var parentCtx = new SpanContext(new ZipkinTraceContext(3343, 131, 23, true, true, true));
             using (var span = tracer.BuildSpan("test").FollowsFrom(parentCtx).Start())
             {
-                var ctx = span.Context as SpanContext;
-                Assert.Equal<ulong>(parentCtx.TraceId, ctx.TraceId);
-                Assert.Equal<ulong>(parentCtx.SpanId, ctx.ParentId.Value);
-                Assert.Equal(parentCtx.Sampled, ctx.Sampled);
+                var ctx = (span.Context as SpanContext).TraceContext;
+                Assert.Equal(parentCtx.TraceContext.TraceId, ctx.TraceId);
+                Assert.Equal<ulong>(parentCtx.TraceContext.SpanId, ctx.ParentId.Value);
+                Assert.Equal(parentCtx.TraceContext.Sampled, ctx.Sampled);
             }
         }
 
@@ -50,21 +50,21 @@ namespace Jasiri.Tests
         public void SpanBuilderReturnsSpanWithStartTimeSet()
         {
             var clock = ManualClock.FromUtcNow();
-            var tracer = new Tracer(new TraceOptions()
+            var tracer = new Tracer(new ZipkinTracer(new TraceOptions()
             {
                 Clock = clock.Now
-            });
+            }));
             using (var span = tracer.BuildSpan("test").Start())
             {
                 var zSpan = span as Span;
-                Assert.Equal(clock.StartTime, zSpan.StartTimeStamp);
+                Assert.Equal(clock.StartTime, zSpan.Wrapped.StartTimeStamp.Value);
             }
         }
 
         [Fact]
         public void SpanBuilderReturnsSpanWithTagsSet()
         {
-            var tracer = new Tracer();
+            var tracer = new Tracer(new ZipkinTracer());
             using (var span = tracer.BuildSpan("test")
                 .WithTag("tag1", false)
                 .WithTag("tag2", 1)
@@ -72,7 +72,7 @@ namespace Jasiri.Tests
                 .WithTag("tag4", "tags")
                 .Start())
             {
-                var zSpan = span as Span;
+                var zSpan = (span as Span).Wrapped;
                 Assert.Equal(bool.FalseString, zSpan.Tags["tag1"]);
                 Assert.Equal("1", zSpan.Tags["tag2"]);
                 Assert.Equal("5.6", zSpan.Tags["tag3"]);
@@ -83,10 +83,10 @@ namespace Jasiri.Tests
         [Fact]
         public void SpanKindIsAbsentIfNotSetOnBuilder()
         {
-            var tracer = new Tracer();
+            var tracer = new Tracer(new ZipkinTracer());
             using (var span = tracer.BuildSpan("test").Start())
             {
-                Assert.Equal(SpanKind.ABSENT, ((Span)span).Kind);
+                Assert.Null((span as Span).Wrapped.Kind);
             }
         }
 
@@ -97,13 +97,15 @@ namespace Jasiri.Tests
         [InlineData(Tags.SpanKindProducer, SpanKind.PRODUCER)]
         public void SpanKindIsTranslatedWhenSet(string tagSpanKind, string zipkinSpanKind)
         {
-            var tracer = new Tracer();
+            var spanKind = Enum.Parse<ZipkinSpanKind>(zipkinSpanKind, true);
+
+            var tracer = new Tracer(new ZipkinTracer());
             using (var span = tracer.BuildSpan("test")
                 .WithTag(Tags.SpanKind, tagSpanKind)
                 .Start())
             {
-                var jSpan = span as Span;
-                Assert.Equal(zipkinSpanKind, jSpan.Kind);
+                var jSpan = (span as Span).Wrapped;
+                Assert.Equal(spanKind, jSpan.Kind.Value);
             }
         }
     }
