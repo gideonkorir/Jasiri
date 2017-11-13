@@ -26,7 +26,7 @@ test_script:
   # run the unit tests (requires changing into the test directory)
   - cmd: cd src/Jasiri.Tests
   - cmd: dotnet test
-  - cmd: cd src/Jasiri.OpenTracing.Tests
+  - cmd: cd ../Jasiri.OpenTracing.Tests
   - cmd: dotnet test
 on_finish :
   # any cleanup in here
