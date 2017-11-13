@@ -13,11 +13,11 @@ namespace Jasiri.Tests.Propagation
         {
             var propatagor = new B3Propagator();
             var map = new Dictionary<string, string>();
-            propatagor.Inject(new SpanContext(1, 323423, 4343, false, true, false), new DictionaryPropagatorMap(map));
+            propatagor.Inject(new SpanContext(1, 323423, 4343, true, false, false), new DictionaryPropagatorMap(map));
             Assert.Equal(4, map.Count);
-            Assert.Equal(1.ToString("x4"), map["X-B3-TraceId"]);
-            Assert.Equal(323423.ToString("x4"), map["X-B3-SpanId"]);
-            Assert.Equal(4343.ToString("x4"), map["X-B3-ParentSpanId"]);
+            Assert.Equal(1.ToString("x16"), map["X-B3-TraceId"]);
+            Assert.Equal(323423.ToString("x16"), map["X-B3-SpanId"]);
+            Assert.Equal(4343.ToString("x16"), map["X-B3-ParentSpanId"]);
             Assert.Equal("1", map["X-B3-Sampled"]);
         }
 

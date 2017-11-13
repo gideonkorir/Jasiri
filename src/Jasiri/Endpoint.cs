@@ -30,7 +30,7 @@ namespace Jasiri
                     if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork
                          || ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
                     {
-                        if (!IPAddress.IsLoopback(ip))
+                        if (IPAddress.IsLoopback(ip))
                             continue;
                         else
                             ipAddress = ip;

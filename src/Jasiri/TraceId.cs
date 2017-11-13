@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace Jasiri
@@ -36,8 +37,8 @@ namespace Jasiri
         public override string ToString()
         {
             if (TraceIdHigh == 0)
-                return TraceIdLow.ToString("x16");
-            return string.Concat(TraceIdHigh.ToString("x16"), TraceIdLow.ToString("x16")); //show re-implement this to reduce memory use
+                return TraceIdLow.ToString("x16", CultureInfo.InvariantCulture);
+            return string.Concat(TraceIdHigh.ToString("x16", CultureInfo.InvariantCulture), TraceIdLow.ToString("x16", CultureInfo.InvariantCulture)); //show re-implement this to reduce memory use
         }
 
         public static implicit operator TraceId(ulong traceIdLow)

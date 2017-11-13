@@ -3,9 +3,12 @@ using System.Globalization;
 
 namespace Jasiri.Propagation
 {
+    /// <summary>
+    /// Propagates according to https://github.com/openzipkin/b3-propagation
+    /// </summary>
     public class B3Propagator : IPropagator
     {
-        private const string IdFormat = "x4";
+        private const string IdFormat = "x16";
 
         // http://zipkin.io/pages/instrumenting.html
         private const string TraceIdHeader = "X-B3-TraceId";
@@ -63,9 +66,9 @@ namespace Jasiri.Propagation
         public void Inject(SpanContext spanContext, IPropagatorMap propagatorMap)
         {
                 propagatorMap[TraceIdHeader] = spanContext.TraceId.ToString();
-                propagatorMap[SpanIdHeader] = spanContext.SpanId.ToString(IdFormat);
+                propagatorMap[SpanIdHeader] = spanContext.SpanId.ToString(IdFormat, CultureInfo.InvariantCulture);
                 if(spanContext.ParentId.HasValue)
-                    propagatorMap[ParentIdHeader] = spanContext.ParentId.Value.ToString(IdFormat);
+                    propagatorMap[ParentIdHeader] = spanContext.ParentId.Value.ToString(IdFormat, CultureInfo.InvariantCulture);
                 if (spanContext.Debug)
                     propagatorMap[DebugHeader] = SampledTrue;
                 else
