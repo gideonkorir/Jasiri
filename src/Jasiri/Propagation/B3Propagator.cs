@@ -25,13 +25,14 @@ namespace Jasiri.Propagation
             if (propagatorMap == null)
                 throw new ArgumentNullException(nameof(propagatorMap));
 
-            ulong? traceId = null, spanId = null, parentId = null;
+            TraceId? traceId = null;
+            ulong? spanId = null, parentId = null;
             bool sampled = false, debug = false;;
             foreach(var entry in propagatorMap)
             {
                 if (string.Equals(entry.Key, TraceIdHeader, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (ulong.TryParse(entry.Value, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var _trace))
+                    if (TraceId.TryParse(entry.Value, out var _trace))
                         traceId = _trace;
                 }
                 else if (string.Equals(entry.Key, SpanIdHeader, StringComparison.OrdinalIgnoreCase))
