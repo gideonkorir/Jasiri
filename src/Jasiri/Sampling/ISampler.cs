@@ -6,7 +6,7 @@ namespace Jasiri.Sampling
 {
     public interface ISampler
     {
-        SamplingStatus Sample(string operationName, ulong traceId);
+        SamplingStatus Sample(string operationName, TraceId traceId);
     }
 
     public struct SamplingStatus

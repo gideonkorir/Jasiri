@@ -78,6 +78,10 @@ namespace Jasiri
             {
                 sampled = parentContext.Sampled;
             }
+
+            if (!sampled)
+                return NullSpan.Instance;
+
             var span = new Span(
                 new SpanContext(traceId, id, parentId, sampled, false, false),
                 operationName,

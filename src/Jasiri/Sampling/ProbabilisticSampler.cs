@@ -25,9 +25,11 @@ namespace Jasiri.Sampling
             };
         }
 
-        public SamplingStatus Sample(string operationName, ulong traceId)
+        public SamplingStatus Sample(string operationName, TraceId traceId)
         {
-            var sampled = traceId < upperBound;
+            var sampled = traceId.Is128Bit 
+                ? traceId.TraceIdLow < upperBound && traceId.TraceIdHigh < upperBound
+                : traceId.TraceIdLow < upperBound;
             return new SamplingStatus(sampled, tags);
         }
     }

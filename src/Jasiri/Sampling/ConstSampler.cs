@@ -18,7 +18,7 @@ namespace Jasiri.Sampling
             };
         }
 
-        public SamplingStatus Sample(string operationName, ulong traceId)
+        public SamplingStatus Sample(string operationName, TraceId traceId)
         {
             return new SamplingStatus(sample, tags);
         }

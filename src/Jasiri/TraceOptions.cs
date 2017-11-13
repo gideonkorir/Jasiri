@@ -22,6 +22,8 @@ namespace Jasiri
         public IReporter Reporter { get; set; }
         public bool Use128bitTraceId { get; set; }
 
+        public bool UseNullSpanOnNotSampled { get; set; } = true;
+
         internal static TraceOptions ApplyDefaults(TraceOptions option)
         {
             option.Clock = option.Clock ?? Util.Clocks.GenericHighRes;

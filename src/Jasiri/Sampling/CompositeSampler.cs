@@ -13,7 +13,7 @@ namespace Jasiri.Sampling
             this.sampler1 = sampler1 ?? throw new ArgumentNullException(nameof(sampler1));
             this.sampler2 = sampler2 ?? throw new ArgumentNullException(nameof(sampler2));
         }
-        public SamplingStatus Sample(string operationName, ulong traceId)
+        public SamplingStatus Sample(string operationName, TraceId traceId)
         {
             var sample1 = sampler1.Sample(operationName, traceId);
             if(sample1)
