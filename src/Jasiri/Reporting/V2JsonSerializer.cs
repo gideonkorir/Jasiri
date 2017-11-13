@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
 using System.IO;
-using OpenTracing;
 
 namespace Jasiri.Reporting
 {
@@ -11,7 +9,7 @@ namespace Jasiri.Reporting
     {
         public string MediaType => "application/json";
 
-        public string Serialize(IReadOnlyList<ISpan> spans)
+        public string Serialize(IReadOnlyList<IZipkinSpan> spans)
         {
             if (spans == null || spans.Count == 0)
                 return "[]";
@@ -21,44 +19,61 @@ namespace Jasiri.Reporting
             {
                 writer.WriteStartArray();
                 foreach (var span in spans)
-                    Write(writer, span as Span);
+                    Write(writer, span);
                 writer.WriteEndArray();
             }
 
             return builder.ToString();
         }
 
-        void Write(JsonWriter writer, Span span)
+        void Write(JsonWriter writer, IZipkinSpan span)
         {
             writer.WriteStartObject();
             writer.WritePropertyName("traceId");
-            writer.WriteValue(span.TypedContext.TraceId.ToString("x16"));
+            writer.WriteValue(span.Context.TraceId.ToString());
             writer.WritePropertyName("name");
-            writer.WriteValue(span.OperationName);
-            writer.WritePropertyName("parentId");
-            writer.WriteValue(span.TypedContext.ParentId?.ToString("x16"));
+            writer.WriteValue(span.Name);
             writer.WritePropertyName("id");
-            writer.WriteValue(span.TypedContext.SpanId.ToString("x16"));
-            if (!string.Equals(span.Kind, SpanKind.ABSENT))
-            {
-                writer.WritePropertyName("kind");
-                writer.WriteValue(span.Kind);
-            }
+            writer.WriteValue(span.Context.SpanId.ToString("x16"));
+            //set parent id if specified
+            writer.WritePropertyName("parentId");
+            writer.WriteValue(span.Context.ParentId?.ToString("x16"));
+
+            //set span id if specified
+            Write(writer, span.Kind);
             writer.WritePropertyName("timestamp");
             writer.WriteValue(ZipkinUtil.UnixStartMs(span));
             writer.WritePropertyName("duration");
             writer.WriteValue(ZipkinUtil.DurationMs(span));
             writer.WritePropertyName("debug");
-            writer.WriteValue(span.TypedContext.Debug);
+            writer.WriteValue(span.Context.Debug);
             writer.WritePropertyName("shared");
-            writer.WriteValue(span.TypedContext.Shared);
+            writer.WriteValue(span.Context.Shared);
             //remote endpoint obj
             Write(writer, "localEndpoint", span.LocalEndpoint);
             Write(writer, "remoteEndpoint", span.RemoteEndpoint);
-            Write(writer, span.Logs);
+            Write(writer, span.Annotations);
             Write(writer, span.Tags);
 
             writer.WriteEndObject();
+        }
+
+        void Write(JsonWriter writer, SpanKind? spanKind)
+        {
+            if (spanKind == null)
+                return;
+            string kind = "CLIENT";
+            switch(spanKind.Value)
+            {
+                case SpanKind.SERVER:
+                    kind = "SERVER"; break;
+                case SpanKind.PRODUCER:
+                    kind = "PRODUCER"; break;
+                case SpanKind.CONSUMER:
+                    kind = "CONSUMER"; break;
+            }
+            writer.WritePropertyName("kind");
+            writer.WriteValue(kind);
         }
 
         void Write(JsonWriter writer, string name, Endpoint endpoint)
@@ -78,7 +93,7 @@ namespace Jasiri.Reporting
             writer.WriteEndObject();
         }
 
-        void Write(JsonWriter writer, IReadOnlyList<LogData> annotations)
+        void Write(JsonWriter writer, IReadOnlyList<Annotation> annotations)
         {
             writer.WritePropertyName("annotations");
             writer.WriteStartArray();
@@ -88,7 +103,7 @@ namespace Jasiri.Reporting
                 {
                     writer.WriteStartObject();
                     writer.WritePropertyName("timestamp");
-                    writer.WriteValue(ZipkinUtil.ToUnixMs(annotation.Timestamp));
+                    writer.WriteValue(ZipkinUtil.ToUnixMs(annotation.TimeStamp));
                     writer.WritePropertyName("value");
                     writer.WriteValue(annotation.Value);
                     writer.WriteEndObject();

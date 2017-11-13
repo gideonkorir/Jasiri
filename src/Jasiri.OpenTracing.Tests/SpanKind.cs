@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jasiri
+namespace Jasiri.OpenTracing.Tests
 {
-    public static class SpanKind
+    static class SpanKind
     {
         public const string
             CLIENT = "CLIENT",
             SERVER = "SERVER",
-            PRODUCER = "PRODUCER",
             CONSUMER = "CONSUMER",
-            ABSENT = "ABSENT";
+            PRODUCER = "PRODUCER";
     }
 }

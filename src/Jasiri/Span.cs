@@ -1,160 +1,125 @@
-﻿using OpenTracing;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 
 namespace Jasiri
 {
-    public class Span : ISpan
+    public class Span : IZipkinSpan
     {
-        readonly SpanContext context;
-        readonly Tracer tracer;
+        readonly ITracer zipkinTracer;
+        private DateTimeOffset? startTimeStamp, finishTimeStamp;
+        private Dictionary<string, string> tags;
+        private List<Annotation> annotations;
+        
 
-        //the context
-        public ISpanContext Context => context;
-        public SpanContext TypedContext => context;
+        public string Name { get; set; }
 
+        public DateTimeOffset? StartTimeStamp => startTimeStamp;
 
-        bool disposed = false;
-        readonly DateTimeOffset startTimestamp;
-        DateTimeOffset? finishTimeStamp;
-        private string operationName;
-
-        readonly Dictionary<string, string> tags = new Dictionary<string, string>();
-        readonly List<LogData> logs = new List<LogData>();
-
-        public string OperationName => operationName;
-        public DateTimeOffset StartTimeStamp => startTimestamp;
         public DateTimeOffset? FinishTimeStamp => finishTimeStamp;
-        public string Kind { get; }
 
-        public Endpoint LocalEndpoint { get; }
-        public Endpoint RemoteEndpoint { get; private set; }
+        public Endpoint LocalEndpoint => zipkinTracer.Host;
 
-        public IReadOnlyList<LogData> Logs => logs;
-        public IReadOnlyDictionary<string, string> Tags => tags;
+        public Endpoint RemoteEndpoint { get; set; }
 
+        public SpanKind? Kind { get; set; }
 
-        public Span(string operationName, SpanContext context, 
-            string spanKind, DateTimeOffset startTimestamp,
-            Endpoint localEndpoint, Endpoint remoteEndpoint,
-            IDictionary<string, string> tags, Tracer tracer)
+        public SpanContext Context { get; }
+
+        public IReadOnlyDictionary<string, string> Tags => tags ?? Empty.Tags;
+
+        public IReadOnlyList<Annotation> Annotations => annotations ?? Empty.Annotations;
+
+        public Span(SpanContext context, string name, ITracer zipkinTracer)
         {
-            this.operationName = operationName;
-            Kind = spanKind;
-            this.startTimestamp = startTimestamp;
-            this.context = context ?? throw new ArgumentNullException(nameof(context));
-            LocalEndpoint = localEndpoint;
-            RemoteEndpoint = remoteEndpoint;
-            this.tracer = tracer ?? throw new ArgumentNullException(nameof(tracer));
-            this.tags.AddRange(tags);
+            this.Context = context ?? throw new ArgumentNullException(nameof(context));
+            this.zipkinTracer = zipkinTracer ?? throw new ArgumentNullException(nameof(zipkinTracer));
+            Name = name;
         }
 
-        public ISpan SetOperationName(string operationName)
-        {
-            ThrowDisposed();
-            if (!string.IsNullOrWhiteSpace(operationName))
-                this.operationName = operationName;
-            return this;
-        }
+        public IZipkinSpan Annotate(string value)
+            => Annotate(zipkinTracer.Clock(), value);
 
-        public string GetBaggageItem(string key)
+        public IZipkinSpan Annotate(DateTimeOffset timeStamp, string value)
         {
-            ThrowDisposed();
-            return context.GetBaggageItem(key);
-        }
-
-        public ISpan SetBaggageItem(string key, string value)
-        {
-            ThrowDisposed();
-            return this; //zipkin no baggage support
-        }
-
-        public ISpan Log(IEnumerable<KeyValuePair<string, object>> fields)
-            => Log(tracer.Clock(), fields);
-
-        public ISpan Log(DateTimeOffset timestamp, IEnumerable<KeyValuePair<string, object>> fields)
-        {
-            ThrowDisposed();
-            if (fields == null)
-                return this;
-            var map = fields.ToDictionary(c => c.Key, c => c.Value);
-            if(map.TryGetValue("event", out var @event) && @event != null && map.Count == 1)
+            annotations = annotations ?? new List<Annotation>();
+            if ("cs".Equals(value, StringComparison.OrdinalIgnoreCase))
             {
-                logs.Add(new LogData(timestamp, @event.ToString()));
-                return this;
+                Kind = SpanKind.CLIENT;
+                startTimeStamp = timeStamp;
             }
-
-            var aggregage = map.Aggregate((string)null, 
-                (current, value) => current == null 
-                    ? $"{value.Key}={value.Value}" 
-                    : current + $" {value.Key}={value.Value}"
-                    );
-            logs.Add(new LogData(timestamp, aggregage));
+            else if ("sr".Equals(value, StringComparison.OrdinalIgnoreCase))
+            {
+                Kind = SpanKind.SERVER;
+                startTimeStamp = timeStamp;
+            }
+            else if ("cr".Equals(value, StringComparison.OrdinalIgnoreCase))
+            {
+                Kind = SpanKind.CLIENT;
+                Finish(timeStamp);
+            }
+            else if ("ss".Equals(value, StringComparison.Ordinal))
+            {
+                Kind = SpanKind.SERVER;
+                Finish(timeStamp);
+            }
+            else
+            {
+                annotations.Add(new Annotation(timeStamp, value));
+            }
             return this;
-        }
-
-        public ISpan Log(string eventName)
-            => Log(tracer.Clock(), eventName);
-
-        public ISpan Log(DateTimeOffset timestamp, string eventName)
-        {
-            ThrowDisposed();
-            logs.Add(new LogData(timestamp, eventName));
-            return this;
-        }
-
-        public ISpan SetTag(string key, bool value)
-            => SetTag(key, value.ToString());
-
-        public ISpan SetTag(string key, double value)
-            => SetTag(key, value.ToString());
-
-        public ISpan SetTag(string key, int value)
-            => SetTag(key, value.ToString());
-
-        public ISpan SetTag(string key, string value)
-        {
-            ThrowDisposed();
-            if (string.IsNullOrWhiteSpace(key))
-                return this;
-            tags[key] = value;
-            return this;
-        }
-
-        public void Finish()
-            => Finish(tracer.Clock());
-
-        public void Finish(DateTimeOffset finishTimestamp)
-        {
-            ThrowDisposed();
-            if (!finishTimeStamp.HasValue)
-                finishTimeStamp = finishTimestamp;
-            if (RemoteEndpoint == null && Kind == SpanKind.CLIENT)
-                RemoteEndpoint = Ext.Build(tags);
-            tracer.Report(this);
         }
 
         public void Dispose()
         {
-            if(!disposed)
+            if(finishTimeStamp == null)
             {
                 Finish();
-                disposed = true;
             }
         }
 
-        void ThrowDisposed()
+        public IZipkinSpan Finish()
+            => Finish(zipkinTracer.Clock());
+
+        public IZipkinSpan Finish(DateTimeOffset timeStamp)
         {
-            if (disposed)
-                throw new ObjectDisposedException($"Span operation: {operationName} disposed");
+            if (!finishTimeStamp.HasValue)
+            {
+                finishTimeStamp = timeStamp;
+                zipkinTracer.Report(this);
+            }
+            return this;
+        }
+
+        public IZipkinSpan Start()
+            => Start(zipkinTracer.Clock());
+
+        public IZipkinSpan Start(DateTimeOffset timeStamp)
+        {
+            if(startTimeStamp == null)
+            {
+                startTimeStamp = timeStamp;
+                Current = this;
+            }
+            return this;
+        }
+
+        public IZipkinSpan Tag(string key, string value)
+        {
+            tags = tags ?? new Dictionary<string, string>();
+            tags.Add(key, value);
+            return this;
+        }
+
+        public IZipkinSpan Abandon()
+        {
+            return this;
         }
 
         static readonly AsyncLocal<Span> current = new AsyncLocal<Span>();
 
-        public static Span Current
+        internal static Span Current
         {
             get => current.Value;
             set => current.Value = value;

@@ -2,10 +2,16 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OpenTracing
+namespace Jasiri
 {
     public static class Trace
     {
-        public static ITracer Tracer { get; set; } = NullTracer.NullTracer.Instance;
+        static readonly ITracer noOpTracer = new NoOpTracer();
+        static ITracer tracer = noOpTracer;
+        public static ITracer Tracer
+        {
+            get => tracer;
+            set => tracer = value ?? noOpTracer;
+        }
     }
 }

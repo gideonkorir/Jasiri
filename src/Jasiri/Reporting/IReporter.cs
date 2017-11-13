@@ -1,13 +1,8 @@
-﻿using OpenTracing;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Jasiri.Reporting
+﻿namespace Jasiri.Reporting
 {
     public interface IReporter
     {
-        void Report(ISpan span);
+        void Report(IZipkinSpan span);
     }
 
     public class NullReporter : IReporter
@@ -18,7 +13,7 @@ namespace Jasiri.Reporting
         {
 
         }
-        public void Report(ISpan span)
+        public void Report(IZipkinSpan span)
         {
             //do nothing
         }

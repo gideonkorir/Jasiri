@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using OpenTracing;
-using OpenTracing.Propagation;
 using System.Globalization;
 
 namespace Jasiri.Propagation
 {
-    public class B3Propagator : IPropagator<ITextMap>
+    /// <summary>
+    /// Propagates according to https://github.com/openzipkin/b3-propagation
+    /// </summary>
+    public class B3Propagator : IPropagator
     {
-        private const string IdFormat = "x4";
+        private const string IdFormat = "x16";
 
         // http://zipkin.io/pages/instrumenting.html
         private const string TraceIdHeader = "X-B3-TraceId";
@@ -21,15 +20,19 @@ namespace Jasiri.Propagation
         private const string SampledTrue = "1";
         private const string SampledFalse = "0";
 
-        public ISpanContext Extract(ITextMap carrier)
+        public SpanContext Extract(IPropagatorMap propagatorMap)
         {
-            ulong? traceId = null, spanId = null, parentId = null;
+            if (propagatorMap == null)
+                throw new ArgumentNullException(nameof(propagatorMap));
+
+            TraceId? traceId = null;
+            ulong? spanId = null, parentId = null;
             bool sampled = false, debug = false;;
-            foreach(var entry in carrier.GetEntries())
+            foreach(var entry in propagatorMap)
             {
                 if (string.Equals(entry.Key, TraceIdHeader, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (ulong.TryParse(entry.Value, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var _trace))
+                    if (TraceId.TryParse(entry.Value, out var _trace))
                         traceId = _trace;
                 }
                 else if (string.Equals(entry.Key, SpanIdHeader, StringComparison.OrdinalIgnoreCase))
@@ -53,27 +56,29 @@ namespace Jasiri.Propagation
             }
             if (traceId == null || spanId == null)
                 return null;
-            return new SpanContext(traceId.Value, spanId.Value, parentId, debug, debug ? debug : sampled);
+            return new SpanContext(traceId.Value,
+                spanId.Value,
+                parentId,
+                sampled,
+                debug,
+                shared: false);
         }
 
-        public void Inject(ISpanContext spanContext, ITextMap carrier)
+        public void Inject(SpanContext spanContext, IPropagatorMap propagatorMap)
         {
-            if(spanContext is SpanContext ctx)
-            {
-                carrier.Set(TraceIdHeader, ctx.TraceId.ToString(IdFormat));
-                carrier.Set(SpanIdHeader, ctx.SpanId.ToString(IdFormat));
-                if(ctx.ParentId.HasValue)
-                    carrier.Set(ParentIdHeader, ctx.ParentId.Value.ToString(IdFormat));
-                if (ctx.Debug)
-                    carrier.Set(DebugHeader, SampledTrue);
+                propagatorMap[TraceIdHeader] = spanContext.TraceId.ToString();
+                propagatorMap[SpanIdHeader] = spanContext.SpanId.ToString(IdFormat, CultureInfo.InvariantCulture);
+                if(spanContext.ParentId.HasValue)
+                    propagatorMap[ParentIdHeader] = spanContext.ParentId.Value.ToString(IdFormat, CultureInfo.InvariantCulture);
+                if (spanContext.Debug)
+                    propagatorMap[DebugHeader] = SampledTrue;
                 else
                 {
-                    if (ctx.Sampled)
-                        carrier.Set(SampledHeader, SampledTrue);
-                    else
-                        carrier.Set(SampledHeader, SampledFalse);
+                    if (spanContext.Sampled)
+                        propagatorMap[SampledHeader] = SampledTrue;
+                    else       
+                        propagatorMap[SampledHeader] = SampledFalse;
                 }
-            }
         }
     }
 }

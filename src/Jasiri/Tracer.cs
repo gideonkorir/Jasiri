@@ -1,69 +1,104 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using OpenTracing;
-using OpenTracing.Propagation;
-using Jasiri.Propagation;
+﻿using Jasiri.Propagation;
 using Jasiri.Reporting;
 using Jasiri.Sampling;
-using Jasiri.Util;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading;
 
 namespace Jasiri
 {
     public class Tracer : ITracer
     {
+        readonly ISampler sampler;
+        readonly Func<ulong> newId;
+        readonly bool use128bitTraceId;
+        readonly IReporter reporter;
+
+        int noOp = 0;
+
         public Func<DateTimeOffset> Clock { get; }
 
-        public Func<ulong> NewId { get; }
+        public Endpoint Host { get; }
 
-        public Endpoint HostEndpoint { get; }
+        public IPropagationRegistry PropagationRegistry { get; }
 
-        internal ISampler Sampler { get; }
-        internal IReporter Reporter { get; }
-
-        internal IPropagationRegistry PropagationRegistry { get; }
-        public ISpanBuilder BuildSpan(string operationName)
-            => new SpanBuilder(this, operationName);
+        public IZipkinSpan ActiveSpan => Span.Current;
 
         public Tracer(TraceOptions options = null)
         {
-            Clock = options?.Clock ?? Clocks.GenericHighRes;
-            NewId = options?.NewId ?? RandomLongGenerator.NewId;
-            HostEndpoint = options?.Endpoint ?? Ext.GetHostEndpoint();
-            Sampler = options?.Sampler ?? new ConstSampler(false);
-            Reporter = options?.Reporter ?? NullReporter.Instance;
-            PropagationRegistry = options?.PropagationRegistry;
-            if(PropagationRegistry == null)
+            options = TraceOptions.ApplyDefaults(options ?? new TraceOptions());
+            sampler = options.Sampler;
+            newId = options.NewId;
+            Host = options.Endpoint;
+            Clock = options.Clock;
+            use128bitTraceId = options.Use128bitTraceId;
+            PropagationRegistry = options.PropagationRegistry;
+            this.reporter = options.Reporter;
+        }
+
+        public bool NoOp
+        {
+            get => noOp == 1;
+            set => Interlocked.Exchange(ref noOp, value ? 1 : 0);
+        }
+
+        public IZipkinSpan NewSpan(string operationName, bool forceNew = false)
+            => NewSpanImpl(operationName, forceNew ? null : ActiveSpan?.Context);
+
+        public IZipkinSpan NewSpan(string operationName, SpanContext parentContext)
+        {
+            if (parentContext == null)
+                throw new ArgumentNullException(nameof(parentContext));
+            return NewSpanImpl(operationName, parentContext);
+        }
+
+        IZipkinSpan NewSpanImpl(string operationName, SpanContext parentContext = null)
+        {
+            if (NoOp || (parentContext != null && !parentContext.Sampled))
+                return NullSpan.Instance;
+
+            var id = newId();
+            //if parentContext is specified use the parent's TraceId
+            var traceId = parentContext != null ? parentContext.TraceId 
+                : (use128bitTraceId ? new TraceId(newId(), id) : new TraceId(id));
+
+            //if parentContext is specified we set the parentid to be that of
+            //the specified context
+            var parentId = parentContext == null ? new ulong?() : parentContext.SpanId;
+            var sampleTags = Empty.Tags;
+            bool sampled = false;
+            if(parentContext == null)
             {
-                var registry = new InMemoryPropagationRegistry();
-                var propagator = new B3Propagator();
-                registry.Register(Formats.HttpHeaders, propagator);
-                registry.Register(Formats.TextMap, propagator);
-                PropagationRegistry = registry;
+                var result = sampler.Sample(operationName, id);
+                sampled = result.Sampled;
+                sampleTags = result.Tags;
             }
-        }
-
-        public ISpanContext Extract<TCarrier>(Format<TCarrier> format, TCarrier carrier)
-        {
-            ISpanContext context = null;
-            if (PropagationRegistry.TryGet(format, out var propagator))
-                context = propagator.Extract(carrier);
-            return context;
-        }
-
-        public void Inject<TCarrier>(ISpanContext spanContext, Format<TCarrier> format, TCarrier carrier)
-        {
-            if (PropagationRegistry.TryGet(format, out var propagator))
-                propagator.Inject(spanContext, carrier);
             else
-                throw new NotImplementedException($"Propagator for format {format.Name} not found");
+            {
+                sampled = parentContext.Sampled;
+            }
+            var span = new Span(
+                new SpanContext(traceId, id, parentId, sampled, false, false),
+                operationName,
+                this
+                );
+            //set tags
+            if(sampleTags.Count > 0)
+            {
+                foreach (var tag in sampleTags)
+                    span.Tag(tag.Key, tag.Value);
+            }
+            return span;            
         }
 
-        internal void Report(Span span)
+        public void Report(IZipkinSpan span)
         {
-            if (!span.TypedContext.Sampled)
-                return; //no need to report
-            Reporter.Report(span);
+            if (span == null)
+                return;
+            if (!span.Context.Sampled)
+                return;
+            reporter.Report(span);
         }
     }
 }

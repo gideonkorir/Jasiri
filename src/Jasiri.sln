@@ -1,10 +1,14 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+VisualStudioVersion = 15.0.27004.2008
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jasiri", "Jasiri\Jasiri.csproj", "{F3564DEA-0954-4A28-965D-08F7933B9EF0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jasiri.Tests", "Jasiri.Tests\Jasiri.Tests.csproj", "{56B7CE07-121E-4028-8F70-D049CB11E243}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jasiri.Tests", "Jasiri.Tests\Jasiri.Tests.csproj", "{56B7CE07-121E-4028-8F70-D049CB11E243}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jasiri.OpenTracing", "Jasiri.OpenTracing\Jasiri.OpenTracing.csproj", "{3EAF5A54-DDFE-49A8-92AD-57F499A3B4AE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jasiri.OpenTracing.Tests", "Jasiri.OpenTracing.Tests\Jasiri.OpenTracing.Tests.csproj", "{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,6 +44,30 @@ Global
 		{56B7CE07-121E-4028-8F70-D049CB11E243}.Release|x64.Build.0 = Release|Any CPU
 		{56B7CE07-121E-4028-8F70-D049CB11E243}.Release|x86.ActiveCfg = Release|Any CPU
 		{56B7CE07-121E-4028-8F70-D049CB11E243}.Release|x86.Build.0 = Release|Any CPU
+		{3EAF5A54-DDFE-49A8-92AD-57F499A3B4AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EAF5A54-DDFE-49A8-92AD-57F499A3B4AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EAF5A54-DDFE-49A8-92AD-57F499A3B4AE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3EAF5A54-DDFE-49A8-92AD-57F499A3B4AE}.Debug|x64.Build.0 = Debug|Any CPU
+		{3EAF5A54-DDFE-49A8-92AD-57F499A3B4AE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3EAF5A54-DDFE-49A8-92AD-57F499A3B4AE}.Debug|x86.Build.0 = Debug|Any CPU
+		{3EAF5A54-DDFE-49A8-92AD-57F499A3B4AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EAF5A54-DDFE-49A8-92AD-57F499A3B4AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EAF5A54-DDFE-49A8-92AD-57F499A3B4AE}.Release|x64.ActiveCfg = Release|Any CPU
+		{3EAF5A54-DDFE-49A8-92AD-57F499A3B4AE}.Release|x64.Build.0 = Release|Any CPU
+		{3EAF5A54-DDFE-49A8-92AD-57F499A3B4AE}.Release|x86.ActiveCfg = Release|Any CPU
+		{3EAF5A54-DDFE-49A8-92AD-57F499A3B4AE}.Release|x86.Build.0 = Release|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Debug|x64.Build.0 = Debug|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Debug|x86.Build.0 = Debug|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Release|x64.ActiveCfg = Release|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Release|x64.Build.0 = Release|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Release|x86.ActiveCfg = Release|Any CPU
+		{F8E603C6-0BA7-40CE-9D06-6C2D326C8C24}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

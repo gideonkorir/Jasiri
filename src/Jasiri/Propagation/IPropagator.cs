@@ -1,15 +1,9 @@
-﻿using OpenTracing;
-using OpenTracing.Propagation;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Jasiri.Propagation
+﻿namespace Jasiri.Propagation
 {
-    public interface IPropagator<in T>
+    public interface IPropagator
     {
-        void Inject(ISpanContext spanContext, T carrier);
+        void Inject(SpanContext spanContext, IPropagatorMap propagatorMap);
 
-        ISpanContext Extract(T carrier);
+        SpanContext Extract(IPropagatorMap propagatorMap);
     }
 }
