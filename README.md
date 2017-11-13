@@ -1,31 +1,43 @@
 # Jasiri
 OpenTracing + OpenZipkin
 
-This is an [OpenTracing](http://opentracing.io/) implementation for [Zipkin](http://zipkin.io/). The name **Jasiri** is Swahili for **Brave** which is the name of the official zipkin client in Java.
+This is an [OpenTracing](http://opentracing.io/) compatibile implementation of [Zipkin](http://zipkin.io/) based on the Zipkin V2 api. The name **Jasiri** is Swahili for **Brave** which is the name of the official zipkin client in Java.
 
-## How to use
+## How to use without OpenTracing
+
+Add a reference to Jasiri nuget package
 
 ```
     var sender = new HttpZipkinTraceSender(
         ZipkinHttpApi.V2("http://localhost:9411"), new HttpClient()
         );
-    var reporter = new PeriodicReporter(sender, new FlushOptions()
+    var registry = new InMemoryPropagationRegistry();
+    registry.Register("b3", new B3Propagator()); //you can register multiple propagators for different transports
+    var tracer = new Tracer(new TraceOptions()
     {
-        MaxBufferSize = 100,
-        FlushInterval = TimeSpan.FromSeconds(1),
-        CancellationToken = CancellationToken.None
+        Reporter = new PeriodicReporter(sender, new FlushOptions()
+        {
+            FlushInterval = TimeSpan.FromSeconds(1),
+            MaxBufferSize = 100
+        }),
+        PropagationRegistry = registry,
+        Endpoint = Endpoint.GetHostEndpoint()
     });
-    Trace.Tracer = new Tracer(new TraceOptions()
-    {
-        Reporter = reporter 
-    }); //use everything else default
+    Trace.Tracer = tracer;
 
-    using(var span = Trace.Tracer.BuildSpan("try out zipkin")
-        .WithTag(Tags.SpanKind, Tags.SpanKindClient)
-        .Start()
-        )
+    //in another piece of code
+    using(var span = Trace.Tracer.NewSpan("try out jasiri").Tag("tag1", "value1").Start())
     {
         DoSomethingAwesome();
     }
+```
 
+## How to use OpenTracing
+
+Add a reference to Jasiri.OpenTracing package
+
+```
+    //create tracer as specified above
+    var tracer = TracerAsSpecifiedAbove();
+    OpenTracing.Trace.Tracer = new OTTracer(tracer);
 ```
