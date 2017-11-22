@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
     <PackageId>Jasiri</PackageId>
     <PackageVersion>0.2.0</PackageVersion>
     <Title>Zipkin v2 compatible client library</Title>
@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="newtonsoft.json" Version="10.0.3" />
+    <PackageReference Include="system.net.http" Version="4.3.3" />
   </ItemGroup>
 
 </Project>
