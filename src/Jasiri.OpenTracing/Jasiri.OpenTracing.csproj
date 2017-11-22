@@ -1,7 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>Jasiri.OpenTracing</PackageId>
+    <PackageVersion>0.2.0</PackageVersion>
+    <Title>Open tracing wrapper for Jasiri zipkin client</Title>
+    <Authors>Gideon Korir</Authors>
+    <Description>
+      Open tracing wrapper for Jasiri zipkin client
+    </Description>
+    <Copyright>Gideon Korir</Copyright>
+    <PackageProjectUrl>https://github.com/gideonkorir/Jasiri</PackageProjectUrl>
+    <PackageTags>OpenTracing, Zipkin, OpenZipkin, Tracing</PackageTags>
+    <RepositoryUrl>https://github.com/gideonkorir/Jasiri</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
