@@ -26,7 +26,7 @@ Add a reference to Jasiri nuget package
     Trace.Tracer = tracer;
 
     //in another piece of code
-    using(var span = Trace.Tracer.NewSpan("try out jasiri").Tag("tag1", "value1").Start())
+    using(var span = Trace.NewSpan("try out jasiri").Tag("tag1", "value1").Start())
     {
         DoSomethingAwesome();
     }
@@ -40,4 +40,10 @@ Add a reference to Jasiri.OpenTracing package
     //create tracer as specified above
     var tracer = TracerAsSpecifiedAbove();
     OpenTracing.Trace.Tracer = new OTTracer(tracer);
+    using(var span = OpenTracing.Trace.BuildSpan("open_jasiri")
+        .WithTag("Jasiri", "IsCool")
+        .WithTag(Tags.SpanKind, Tags.SpanKindServer)
+        .Start())
+    {
+    }
 ```
