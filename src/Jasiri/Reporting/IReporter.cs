@@ -2,7 +2,7 @@
 {
     public interface IReporter
     {
-        void Report(IZipkinSpan span);
+        void Report(Span span);
     }
 
     public class NullReporter : IReporter
@@ -13,7 +13,7 @@
         {
 
         }
-        public void Report(IZipkinSpan span)
+        public void Report(Span span)
         {
             //do nothing
         }

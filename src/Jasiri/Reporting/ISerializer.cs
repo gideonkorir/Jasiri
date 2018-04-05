@@ -5,6 +5,6 @@ namespace Jasiri.Reporting
     public interface ISerializer
     {
         string MediaType { get; }
-        string Serialize(IReadOnlyList<IZipkinSpan> spans);
+        string Serialize(IReadOnlyList<Span> spans);
     }
 }

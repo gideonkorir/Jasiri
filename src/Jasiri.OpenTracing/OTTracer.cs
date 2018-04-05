@@ -14,17 +14,23 @@ namespace Jasiri.OpenTracing
     {
         readonly ITracer zipkinTracer;
 
+        public IScopeManager ScopeManager { get; }
+
+        public ISpan ActiveSpan
+            => ScopeManager.Active.Span;
+
         public OTTracer(ITracer zipkinTracer)
         {
             this.zipkinTracer = zipkinTracer ?? throw new ArgumentNullException(nameof(zipkinTracer));
+            ScopeManager = new Adapters.OTScopeManager(zipkinTracer.ScopeManager);
         }
 
         public ISpanBuilder BuildSpan(string operationName)
             => new SpanBuilder(zipkinTracer, operationName);
 
-        public ISpanContext Extract<TCarrier>(Format<TCarrier> format, TCarrier carrier)
+        public ISpanContext Extract<TCarrier>(IFormat<TCarrier> format, TCarrier carrier)
         {
-            if(carrier is ITextMap map && zipkinTracer.PropagationRegistry.TryGet(format.Name, out var propagator))
+            if(carrier is ITextMap map && zipkinTracer.PropagationRegistry.TryGet(typeof(TCarrier).Name, out var propagator))
             {
                 var context = propagator.Extract(Adapt.ToPropagatorMap(map));
                 return context == null ? null : new OTSpanContext(context);
@@ -32,18 +38,18 @@ namespace Jasiri.OpenTracing
             return null;
         }
 
-        public void Inject<TCarrier>(ISpanContext spanContext, Format<TCarrier> format, TCarrier carrier)
+        public void Inject<TCarrier>(ISpanContext spanContext, IFormat<TCarrier> format, TCarrier carrier)
         {
             if(spanContext is OTSpanContext ctx && 
-                carrier is ITextMap map && zipkinTracer.PropagationRegistry.TryGet(format.Name, out var propagator))
+                carrier is ITextMap map && zipkinTracer.PropagationRegistry.TryGet(typeof(TCarrier).Name, out var propagator))
             {
                 propagator.Inject(ctx.TraceContext, Adapt.ToPropagatorMap(map));
             }
             else
-                throw new NotImplementedException($"Propagator for format {format.Name} not found");
+                throw new NotImplementedException($"Propagator for format {typeof(TCarrier).Name} not found");
         }
 
         public static OTTracer FromCurrentTracer()
-            => new OTTracer(Trace.Tracer);
+            => new OTTracer(GlobalTracer.Tracer);
     }
 }

@@ -19,6 +19,8 @@ namespace Jasiri
 
         public IPropagationRegistry PropagationRegistry { get; set; }
 
+        public IManageSpanScope ScopeManager { get; set; }
+
         public IReporter Reporter { get; set; }
         public bool Use128bitTraceId { get; set; }
 
@@ -32,6 +34,7 @@ namespace Jasiri
             option.Endpoint = option.Endpoint ?? Endpoint.GetHostEndpoint();
             option.PropagationRegistry = option.PropagationRegistry ?? new InMemoryPropagationRegistry();
             option.Reporter = option.Reporter ?? NullReporter.Instance;
+            option.ScopeManager = option.ScopeManager ?? new AsyncLocalSpanScopeManager();
             return option;
         }
     }

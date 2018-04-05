@@ -15,7 +15,7 @@ namespace Jasiri.Tests.Reporting
             var empty = "[]";
             var serializer = new V2JsonSerializer();
             Assert.Equal(empty, serializer.Serialize(null));
-            Assert.Equal(empty, serializer.Serialize(new IZipkinSpan[0]));
+            Assert.Equal(empty, serializer.Serialize(new Span[0]));
         }
 
         [Fact]
@@ -29,9 +29,9 @@ namespace Jasiri.Tests.Reporting
                 NewId = () => 45,
                 Endpoint = new Endpoint("test-host", "127.0.0.1", 56)
             });
-            IZipkinSpan span = null;
+            IScope scope = null;
             DateTimeOffset startSomething, completeSomething;
-            using (span = tracer.NewSpan("test", new SpanContext(345, 2542, 3535, true, true, true))
+            using (scope = tracer.NewSpan("test", new SpanContext(345, 2542, 3535, true, true, true))
                 .SetKind(SpanKind.CLIENT)
                 .Tag("tag1", 1)
                 .Tag("tag2", true)
@@ -39,28 +39,27 @@ namespace Jasiri.Tests.Reporting
                 .Tag("tag4", "please work")
                 .SetRemoteEndpoint(new Endpoint("server-host", "192.168.0.1", 67))
                 .Tag("peer.address", "http://server-host:67/")
-                .Start())
+                .Activate())
             {
                 clock.Move(TimeSpan.FromMilliseconds(10));
                 startSomething = clock.Now();
-                span.Annotate("starting something");
+                scope.Span.Annotate("starting something");
                 clock.Move(TimeSpan.FromMilliseconds(456));
-                span.Annotate("completed something");
+                scope.Span.Annotate("completed something");
                 completeSomething = clock.Now();
-                span.Finish();
             }
             var serializer = new V2JsonSerializer();
-            var jobj = JArray.Parse(serializer.Serialize(new IZipkinSpan[] { span }));
+            var jobj = JArray.Parse(serializer.Serialize(new Span[] { scope.Span }));
             var spanObj = jobj[0];
             Assert.Equal(345.ToString("x16"), spanObj["traceId"].Value<string>());
             Assert.Equal(45.ToString("x16"), spanObj["id"].Value<string>());
             Assert.Equal(2542.ToString("x16"), spanObj["parentId"].Value<string>());
             Assert.Equal("test", spanObj["name"].Value<string>());
             Assert.Equal("CLIENT", spanObj["kind"].Value<string>());
-            Assert.Equal(ZipkinUtil.ToUnixMs(span.StartTimeStamp.Value), spanObj["timestamp"].Value<long>());
-            Assert.Equal(ZipkinUtil.DurationMs(span), spanObj["duration"].Value<long>());
-            Assert.Equal(span.Context.Debug, spanObj["debug"].Value<bool>());
-            Assert.Equal(span.Context.Shared, spanObj["shared"].Value<bool>());
+            Assert.Equal(ZipkinUtil.ToUnixMs(scope.Span.StartTimeStamp.Value), spanObj["timestamp"].Value<long>());
+            Assert.Equal(ZipkinUtil.DurationMs(scope.Span), spanObj["duration"].Value<long>());
+            Assert.Equal(scope.Span.Context.Debug, spanObj["debug"].Value<bool>());
+            Assert.Equal(scope.Span.Context.Shared, spanObj["shared"].Value<bool>());
 
             var endpoint = spanObj["localEndpoint"];
             Assert.Equal("test-host", endpoint["serviceName"]);
@@ -97,24 +96,23 @@ namespace Jasiri.Tests.Reporting
                 NewId = () => 45,
                 Endpoint = new Endpoint("test-host", "127.0.0.1", 56)
             });
-            IZipkinSpan span = null;
-            using (span = tracer.NewSpan("test", new SpanContext(345, 2542, 3535, true, false, false))
+            IScope scope = null;
+            using (scope = tracer.NewSpan("test", new SpanContext(345, 2542, 3535, true, false, false))
                 .Tag("tag1", 1)
                 .Tag("tag2", true)
                 .Tag("tag3", 4.5)
                 .Tag("tag4", "please work")
                 .SetRemoteEndpoint(new Endpoint("server-host", "192.168.0.1", 67))
                 .Tag("peer.address", "http://server-host:67/")
-                .Start())
+                .Activate())
             {
                 clock.Move(TimeSpan.FromMilliseconds(10));
-                span.Annotate("starting something");
+                scope.Span.Annotate("starting something");
                 clock.Move(TimeSpan.FromMilliseconds(456));
-                span.Annotate("completed something");
-                span.Finish();
+                scope.Span.Annotate("completed something");
             }
             var serializer = new V2JsonSerializer();
-            var jobj = JArray.Parse(serializer.Serialize(new IZipkinSpan[] { span }));
+            var jobj = JArray.Parse(serializer.Serialize(new Span[] { scope.Span }));
             var spanObj = jobj[0];
             Assert.Null(spanObj["kind"]);
         }

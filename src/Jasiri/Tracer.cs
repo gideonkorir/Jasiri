@@ -23,7 +23,7 @@ namespace Jasiri
 
         public IPropagationRegistry PropagationRegistry { get; }
 
-        public IZipkinSpan ActiveSpan => Span.Current;
+        public IManageSpanScope ScopeManager { get; }
 
         public Tracer(TraceOptions options = null)
         {
@@ -34,7 +34,8 @@ namespace Jasiri
             Clock = options.Clock;
             use128bitTraceId = options.Use128bitTraceId;
             PropagationRegistry = options.PropagationRegistry;
-            this.reporter = options.Reporter;
+            reporter = options.Reporter;
+            ScopeManager = options.ScopeManager;
         }
 
         public bool NoOp
@@ -43,20 +44,20 @@ namespace Jasiri
             set => Interlocked.Exchange(ref noOp, value ? 1 : 0);
         }
 
-        public IZipkinSpan NewSpan(string operationName, bool forceNew = false)
-            => NewSpanImpl(operationName, forceNew ? null : ActiveSpan?.Context);
+        public Span NewSpan(string operationName, bool forceNew = false)
+            => NewSpanImpl(operationName, forceNew ? null : ScopeManager.Current?.Span?.Context);
 
-        public IZipkinSpan NewSpan(string operationName, SpanContext parentContext)
+        public Span NewSpan(string operationName, SpanContext parentContext)
         {
             if (parentContext == null)
                 throw new ArgumentNullException(nameof(parentContext));
             return NewSpanImpl(operationName, parentContext);
         }
 
-        IZipkinSpan NewSpanImpl(string operationName, SpanContext parentContext = null)
+        Span NewSpanImpl(string operationName, SpanContext parentContext = null)
         {
             if (NoOp || (parentContext != null && !parentContext.Sampled))
-                return NullSpan.Instance;
+                return Span.Empty(this);
 
             var id = newId();
             //if parentContext is specified use the parent's TraceId
@@ -80,7 +81,7 @@ namespace Jasiri
             }
 
             if (!sampled)
-                return NullSpan.Instance;
+                return Span.Empty(this);
 
             var span = new Span(
                 new SpanContext(traceId, id, parentId, sampled, false, false),
@@ -93,10 +94,10 @@ namespace Jasiri
                 foreach (var tag in sampleTags)
                     span.Tag(tag.Key, tag.Value);
             }
-            return span;            
+            return span;          
         }
 
-        public void Report(IZipkinSpan span)
+        public void Report(Span span)
         {
             if (span == null)
                 return;
