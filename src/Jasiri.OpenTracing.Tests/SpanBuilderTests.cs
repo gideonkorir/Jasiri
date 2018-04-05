@@ -1,4 +1,5 @@
 ﻿using OpenTracing;
+using OpenTracing.Tag;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,9 +13,9 @@ namespace Jasiri.OpenTracing.Tests
         public void SpanBuilderReturnsSpanWithNonNullContext()
         {
             var tracer = new OTTracer(new Tracer());
-            using (var span = tracer.BuildSpan("test").Start())
+            using (var scope = tracer.BuildSpan("test").StartActive(true))
             {
-                Assert.NotNull(span.Context);
+                Assert.NotNull(scope.Span.Context);
             }
         }
 
@@ -23,9 +24,9 @@ namespace Jasiri.OpenTracing.Tests
         {
             var tracer = new OTTracer(new Tracer());
             var parentCtx = new OTSpanContext(new SpanContext(3343, 131, 23, true, true, true));
-            using (var span = tracer.BuildSpan("test").AsChildOf(parentCtx).Start())
+            using (var scope = tracer.BuildSpan("test").AsChildOf(parentCtx).StartActive(true))
             {
-                var ctx = (span.Context as OTSpanContext).TraceContext;
+                var ctx = (scope.Span.Context as OTSpanContext).TraceContext;
                 Assert.Equal(parentCtx.TraceContext.TraceId, ctx.TraceId);
                 Assert.Equal<ulong>(parentCtx.TraceContext.SpanId, ctx.ParentId.Value);
                 Assert.Equal(parentCtx.TraceContext.Sampled, ctx.Sampled);
@@ -37,9 +38,9 @@ namespace Jasiri.OpenTracing.Tests
         {
             var tracer = new OTTracer(new Tracer());
             var parentCtx = new OTSpanContext(new SpanContext(3343, 131, 23, true, true, true));
-            using (var span = tracer.BuildSpan("test").FollowsFrom(parentCtx).Start())
+            using (var scope = tracer.BuildSpan("test").AddReference(References.FollowsFrom, parentCtx).StartActive(true))
             {
-                var ctx = (span.Context as OTSpanContext).TraceContext;
+                var ctx = (scope.Span.Context as OTSpanContext).TraceContext;
                 Assert.Equal(parentCtx.TraceContext.TraceId, ctx.TraceId);
                 Assert.Equal<ulong>(parentCtx.TraceContext.SpanId, ctx.ParentId.Value);
                 Assert.Equal(parentCtx.TraceContext.Sampled, ctx.Sampled);
@@ -54,9 +55,9 @@ namespace Jasiri.OpenTracing.Tests
             {
                 Clock = clock.Now
             }));
-            using (var span = tracer.BuildSpan("test").Start())
+            using (var scope = tracer.BuildSpan("test").StartActive(true))
             {
-                var zSpan = span as OTSpan;
+                var zSpan = scope.Span as OTSpan;
                 Assert.Equal(clock.StartTime, zSpan.Wrapped.StartTimeStamp.Value);
             }
         }
@@ -65,14 +66,14 @@ namespace Jasiri.OpenTracing.Tests
         public void SpanBuilderReturnsSpanWithTagsSet()
         {
             var tracer = new OTTracer(new Tracer());
-            using (var span = tracer.BuildSpan("test")
+            using (var scope = tracer.BuildSpan("test")
                 .WithTag("tag1", false)
                 .WithTag("tag2", 1)
                 .WithTag("tag3", 5.6)
                 .WithTag("tag4", "tags")
-                .Start())
+                .StartActive(true))
             {
-                var zSpan = (span as OTSpan).Wrapped;
+                var zSpan = (scope.Span as OTSpan).Wrapped;
                 Assert.Equal(bool.FalseString, zSpan.Tags["tag1"]);
                 Assert.Equal("1", zSpan.Tags["tag2"]);
                 Assert.Equal("5.6", zSpan.Tags["tag3"]);
@@ -84,9 +85,9 @@ namespace Jasiri.OpenTracing.Tests
         public void SpanKindIsAbsentIfNotSetOnBuilder()
         {
             var tracer = new OTTracer(new Tracer());
-            using (var span = tracer.BuildSpan("test").Start())
+            using (var scope = tracer.BuildSpan("test").StartActive(true))
             {
-                Assert.Null((span as OTSpan).Wrapped.Kind);
+                Assert.Null((scope.Span as OTSpan).Wrapped.Kind);
             }
         }
 
@@ -100,11 +101,11 @@ namespace Jasiri.OpenTracing.Tests
             var spanKind = Enum.Parse<Jasiri.SpanKind>(zipkinSpanKind, true);
 
             var tracer = new OTTracer(new Tracer());
-            using (var span = tracer.BuildSpan("test")
-                .WithTag(Tags.SpanKind, tagSpanKind)
-                .Start())
+            using (var scope = tracer.BuildSpan("test")
+                .WithTag(Tags.SpanKind.Key, tagSpanKind)
+                .StartActive(true))
             {
-                var jSpan = (span as OTSpan).Wrapped;
+                var jSpan = (scope.Span as OTSpan).Wrapped;
                 Assert.Equal(spanKind, jSpan.Kind.Value);
             }
         }

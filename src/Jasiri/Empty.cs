@@ -13,19 +13,19 @@ namespace Jasiri
 
     public static class ZipkinSpanExt
     {
-        public static IZipkinSpan Named(this IZipkinSpan span, string name)
+        public static Span Named(this Span span, string name)
         {
             span.Name = name;
             return span;
         }
 
-        public static IZipkinSpan SetRemoteEndpoint(this IZipkinSpan span, Endpoint endpoint)
+        public static Span SetRemoteEndpoint(this Span span, Endpoint endpoint)
         {
             span.RemoteEndpoint = endpoint;
             return span;
         }
 
-        public static IZipkinSpan SetKind(this IZipkinSpan span, SpanKind zipkinSpanKind)
+        public static Span SetKind(this Span span, SpanKind zipkinSpanKind)
         {
             span.Kind = zipkinSpanKind;
             return span;

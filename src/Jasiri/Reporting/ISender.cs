@@ -6,6 +6,6 @@ namespace Jasiri.Reporting
 {
     public interface ISender
     {
-        Task SendAsync(IReadOnlyList<IZipkinSpan> spans, CancellationToken cancellationToken);
+        Task SendAsync(IReadOnlyList<Span> spans, CancellationToken cancellationToken);
     }
 }

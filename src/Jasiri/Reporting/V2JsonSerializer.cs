@@ -9,7 +9,7 @@ namespace Jasiri.Reporting
     {
         public string MediaType => "application/json";
 
-        public string Serialize(IReadOnlyList<IZipkinSpan> spans)
+        public string Serialize(IReadOnlyList<Span> spans)
         {
             if (spans == null || spans.Count == 0)
                 return "[]";
@@ -26,7 +26,7 @@ namespace Jasiri.Reporting
             return builder.ToString();
         }
 
-        void Write(JsonWriter writer, IZipkinSpan span)
+        void Write(JsonWriter writer, Span span)
         {
             writer.WriteStartObject();
             writer.WritePropertyName("traceId");

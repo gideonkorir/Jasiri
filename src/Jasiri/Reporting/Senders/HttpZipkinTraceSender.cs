@@ -18,7 +18,7 @@ namespace Jasiri.Reporting.Senders
             this.client = client ?? throw new ArgumentNullException(nameof(client));
         }
 
-        public async Task SendAsync(IReadOnlyList<IZipkinSpan> spans, CancellationToken cancellationToken)
+        public async Task SendAsync(IReadOnlyList<Span> spans, CancellationToken cancellationToken)
         {
             if (spans == null || spans.Count == 0)
                 return;

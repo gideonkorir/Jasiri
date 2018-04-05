@@ -14,15 +14,15 @@ namespace Jasiri
 
         public IPropagationRegistry PropagationRegistry { get; } = new InMemoryPropagationRegistry();
 
-        public IZipkinSpan ActiveSpan => null;
+        public IManageSpanScope ScopeManager { get; } = new AsyncLocalSpanScopeManager();
 
-        public IZipkinSpan NewSpan(string operationName, bool forceNew = false)
-            => NullSpan.Instance;
+        public Span NewSpan(string operationName, bool forceNew = false)
+            => new Span(SpanContext.Empty, operationName, this);
 
-        public IZipkinSpan NewSpan(string operationName, SpanContext parentContext)
-            => NullSpan.Instance;
+        public Span NewSpan(string operationName, SpanContext parentContext)
+            => new Span(parentContext, operationName, this);
 
-        public void Report(IZipkinSpan span)
+        public void Report(Span span)
         {
             //do nothing noop
         }

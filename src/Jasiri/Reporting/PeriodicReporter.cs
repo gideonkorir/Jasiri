@@ -9,17 +9,17 @@ namespace Jasiri.Reporting
     public class PeriodicReporter : IReporter
     {
         readonly ISender sender;
-        readonly Buffer<IZipkinSpan> batch;
+        readonly Buffer<Span> batch;
         readonly PeriodicAsync periodicAsync;
         
         public PeriodicReporter(ISender sender, FlushOptions flushOptions)
         {
             this.sender = sender;
-            batch = new Buffer<IZipkinSpan>(flushOptions.MaxBufferSize);
+            batch = new Buffer<Span>(flushOptions.MaxBufferSize);
             periodicAsync = new PeriodicAsync(FlushAsync, flushOptions.FlushInterval,flushOptions.CancellationToken);
             periodicAsync.Start(this);
         }
-        public void Report(IZipkinSpan span)
+        public void Report(Span span)
             => batch.Add(span);
 
         async Task FlushAsync(object args, CancellationToken cancellationToken)

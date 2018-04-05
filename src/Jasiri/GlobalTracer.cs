@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Jasiri
 {
-    public static class Trace
+    public static class GlobalTracer
     {
         static readonly ITracer noOpTracer = new NoOpTracer();
         static ITracer tracer = noOpTracer;
@@ -14,10 +14,10 @@ namespace Jasiri
             set => tracer = value ?? noOpTracer;
         }
 
-        public static IZipkinSpan NewSpan(string operationName, bool forceNew = false)
+        public static Span NewSpan(string operationName, bool forceNew = false)
             => Tracer.NewSpan(operationName, forceNew);
 
-        public static IZipkinSpan NewSpan(string operationName, SpanContext parentContext)
+        public static Span NewSpan(string operationName, SpanContext parentContext)
             => Tracer.NewSpan(operationName, parentContext);
 
         public static void Inject(string injectorKey, SpanContext spanContext, Propagation.IPropagatorMap propagatorMap)

@@ -20,6 +20,12 @@ namespace Jasiri.OpenTracing.Adapters
         public IEnumerable<KeyValuePair<string, string>> GetEntries()
             => propagatorMap;
 
+        public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
+            => propagatorMap.GetEnumerator();
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            => GetEnumerator();
+
         public void Set(string key, string value)
             => propagatorMap[key] = value;
     }

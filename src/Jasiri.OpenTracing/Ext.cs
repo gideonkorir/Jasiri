@@ -1,4 +1,5 @@
 ﻿using OpenTracing;
+using OpenTracing.Tag;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -27,18 +28,17 @@ namespace Jasiri.OpenTracing
 
             int port = -1;
 
-            if (!(tags.TryGetValue(Tags.PeerService, out string serviceName) || tags.TryGetValue(Tags.PeerHostname, out serviceName)))
+            if (!(tags.TryGetValue(Tags.PeerService.Key, out string serviceName) || tags.TryGetValue(Tags.PeerHostname.Key, out serviceName)))
             {
                 return null;
             }
-            if (!(tags.TryGetValue(Tags.PeerIpV4, out string ipAddress) || tags.TryGetValue(Tags.PeerIpV6, out ipAddress)))
+            if (!(tags.TryGetValue(Tags.PeerHostIpv4.Key, out string ipAddress) || tags.TryGetValue(Tags.PeerHostIpv6.Key, out ipAddress)))
             {
-                if (!tags.TryGetValue(Tags.PeerAddress, out ipAddress))
-                    return null;
+                return null;
             }
             if (portOverride == null)
             {
-                if (tags.TryGetValue(Tags.PeerPort, out var _port) && int.TryParse(_port, out var i))
+                if (tags.TryGetValue(Tags.PeerPort.Key, out var _port) && int.TryParse(_port, out var i))
                     port = i;
             }
             else

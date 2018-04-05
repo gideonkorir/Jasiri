@@ -6,13 +6,13 @@ namespace Jasiri
 {
     public static class Extensions
     {
-        public static IZipkinSpan Tag(this IZipkinSpan span, string key, int value)
+        public static Span Tag(this Span span, string key, int value)
             => span.Tag(key, value.ToString());
 
-        public static IZipkinSpan Tag(this IZipkinSpan span, string key, bool value)
+        public static Span Tag(this Span span, string key, bool value)
             => span.Tag(key, value.ToString());
 
-        public static IZipkinSpan Tag(this IZipkinSpan span, string key, double value)
+        public static Span Tag(this Span span, string key, double value)
             => span.Tag(key, value.ToString());
     }
 }

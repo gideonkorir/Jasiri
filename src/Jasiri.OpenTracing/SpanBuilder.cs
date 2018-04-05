@@ -1,7 +1,7 @@
 ﻿using OpenTracing;
 using System;
 using System.Collections.Generic;
-using Jasiri.Sampling;
+using OpenTracing.Tag;
 
 namespace Jasiri.OpenTracing
 {
@@ -18,14 +18,14 @@ namespace Jasiri.OpenTracing
         Dictionary<string, double> doubleTags = null;
         Dictionary<string, bool> boolTags = null;
         Dictionary<string, string> stringTags = null;
+
+        bool ignoreActiveSpan = false;
         
 
-        public SpanBuilder(Jasiri.ITracer tracer, string operationName)
+        public SpanBuilder(ITracer tracer, string operationName)
         {
             this.tracer = tracer ?? throw new ArgumentNullException(nameof(tracer));
             this.operationName = operationName;
-            if (tracer.ActiveSpan != null)
-                AddReference(References.ChildOf, new OTSpanContext(tracer.ActiveSpan.Context));
         }
 
         public ISpanBuilder AddReference(string referenceType, ISpanContext referencedContext)
@@ -92,13 +92,42 @@ namespace Jasiri.OpenTracing
             return this;
         }
 
-        public ISpan Start()
+        public ISpanBuilder IgnoreActiveSpan()
         {
-            IZipkinSpan span = null;
+            ignoreActiveSpan = true;
+            return this;
+        }
+
+        public ISpan Start()
+            => new OTSpan(BuildSpan().Start(startTimestamp ?? tracer.Clock()));
+
+        public global::OpenTracing.IScope StartActive(bool activate)
+        {
+            Span span = BuildSpan();
+            IScope scope = null;
+            if(activate)
+            {
+                scope = startTimestamp.HasValue ? span.Activate(startTimestamp.Value) : span.Activate();
+            }
+            else
+            {
+                scope = new SpanHandle(span);
+            }
+            return new Adapters.OTScope(scope);
+        }
+
+        Span BuildSpan()
+        {
+            if (!ignoreActiveSpan)
+            {
+                var parent = tracer.ScopeManager.Current?.Span;
+                if (parent != null)
+                    AddReference(References.ChildOf, new OTSpanContext(parent.Context));
+            }
+            Span span = null;
             if (references != null && references.Count > 0)
             {
-                var parentRef = references[0].Context as OTSpanContext;
-                if (parentRef != null)
+                if (references[0].Context is OTSpanContext parentRef)
                     span = tracer.NewSpan(operationName, parentRef.TraceContext);
                 else
                     span = tracer.NewSpan(operationName);
@@ -110,17 +139,13 @@ namespace Jasiri.OpenTracing
             span.Kind = GetSpanKind();
             span.RemoteEndpoint = GetRemote();
             CombineTags(span);
-            if (startTimestamp.HasValue)
-                span.Start(startTimestamp.Value);
-            else
-                span.Start();
-            return new OTSpan(span);
+            return span;
         }
 
         SpanKind? GetSpanKind()
         {
             SpanKind? zipkinSpanKind = null;
-            if(stringTags != null && stringTags.TryGetValue(Tags.SpanKind, out var spanKind) && !string.IsNullOrWhiteSpace(spanKind))
+            if(stringTags != null && stringTags.TryGetValue(Tags.SpanKind.Key, out var spanKind) && !string.IsNullOrWhiteSpace(spanKind))
             {
                 switch(spanKind)
                 {
@@ -144,12 +169,12 @@ namespace Jasiri.OpenTracing
         Endpoint GetRemote()
         {
             int port = -1;
-            bool hasPort = intTags != null && intTags.TryGetValue(Tags.PeerPort, out port);
+            bool hasPort = intTags != null && intTags.TryGetValue(Tags.PeerPort.Key, out port);
             int? portOverride = hasPort ? new int?(port) : null;
             return Ext.Build(stringTags, hasPort ? port : portOverride);
         }
 
-        void CombineTags(IZipkinSpan span)
+        void CombineTags(Span span)
         {
             if (intTags != null)
             {

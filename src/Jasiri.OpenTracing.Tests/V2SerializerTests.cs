@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using Xunit;
 using OpenTracing;
+using OpenTracing.Tag;
 
 namespace Jasiri.OpenTracing.Tests
 {
@@ -21,33 +22,31 @@ namespace Jasiri.OpenTracing.Tests
                 NewId = () => 45,
                 Endpoint = new Endpoint("test-host", "127.0.0.1", 56)
             }));
-            ISpan span = null;
+            global::OpenTracing.IScope scope = null;
             DateTimeOffset startSomething, completeSomething;
-            using (span = tracer.BuildSpan("test")
-                .WithTag(Tags.SpanKind, Tags.SpanKindClient)
+            using (scope = tracer.BuildSpan("test")
+                .WithTag(Tags.SpanKind.Key, Tags.SpanKindClient)
                 .WithTag("tag1", 1)
                 .WithTag("tag2", true)
                 .WithTag("tag3", 4.5)
                 .WithTag("tag4", "please work")
-                .WithTag(Tags.PeerService, "server-host")
-                .WithTag(Tags.PeerPort, 67)
-                .WithTag(Tags.PeerAddress, "http://server-host:67/")
-                .WithTag(Tags.PeerIpV4, "192.168.0.1")
+                .WithTag(Tags.PeerService.Key, "server-host")
+                .WithTag(Tags.PeerPort.Key, 67)
+                .WithTag(Tags.PeerHostIpv4.Key, "192.168.0.1")
                 .AsChildOf(new OTSpanContext(new SpanContext(345, 2542, 3535, true, true, true)))
-                .Start())
+                .StartActive(true))
             {
                 clock.Move(TimeSpan.FromMilliseconds(10));
                 startSomething = clock.Now();
-                span.Log("starting something");
+                scope.Span.Log("starting something");
                 clock.Move(TimeSpan.FromMilliseconds(456));
-                span.Log("completed something");
+                scope.Span.Log("completed something");
                 completeSomething = clock.Now();
-                span.Finish();
             }
-            var zSpan = span as OTSpan;
+            var zSpan = scope.Span as OTSpan;
 
             var serializer = new V2JsonSerializer();
-            var jobj = JArray.Parse(serializer.Serialize(new IZipkinSpan[] { zSpan.Wrapped }));
+            var jobj = JArray.Parse(serializer.Serialize(new Span[] { zSpan.Wrapped }));
             var spanObj = jobj[0];
             Assert.Equal(345.ToString("x16"), spanObj["traceId"].Value<string>());
             Assert.Equal(45.ToString("x16"), spanObj["id"].Value<string>());
@@ -94,28 +93,27 @@ namespace Jasiri.OpenTracing.Tests
                 NewId = () => 45,
                 Endpoint = new Endpoint("test-host", "127.0.0.1", 56)
             }));
-            ISpan span = null;
-            using (span = tracer.BuildSpan("test")
+            global::OpenTracing.IScope scope = null;
+            using (scope = tracer.BuildSpan("test")
                 .WithTag("tag1", 1)
                 .WithTag("tag2", true)
                 .WithTag("tag3", 4.5)
                 .WithTag("tag4", "please work")
-                .WithTag(Tags.PeerService, "server-host")
-                .WithTag(Tags.PeerPort, 67)
-                .WithTag(Tags.PeerAddress, "http://server-host:67/")
-                .WithTag(Tags.PeerIpV4, "192.168.0.1")
+                .WithTag(Tags.PeerService.Key, "server-host")
+                .WithTag(Tags.PeerPort.Key, 67)
+                .WithTag(Tags.HttpUrl.Key, "http://server-host:67/")
+                .WithTag(Tags.PeerHostIpv4.Key, "192.168.0.1")
                 .AsChildOf(new OTSpanContext(new SpanContext(345, 2542, 3535, true, false, false)))
-                .Start())
+                .StartActive(true))
             {
                 clock.Move(TimeSpan.FromMilliseconds(10));
-                span.Log("starting something");
+                scope.Span.Log("starting something");
                 clock.Move(TimeSpan.FromMilliseconds(456));
-                span.Log("completed something");
-                span.Finish();
+                scope.Span.Log("completed something");
             }
-            var zSpan = span as OTSpan;
+            var zSpan = scope.Span as OTSpan;
             var serializer = new V2JsonSerializer();
-            var jobj = JArray.Parse(serializer.Serialize(new IZipkinSpan[] { zSpan.Wrapped }));
+            var jobj = JArray.Parse(serializer.Serialize(new Span[] { zSpan.Wrapped }));
             var spanObj = jobj[0];
             Assert.Null(spanObj["kind"]);
         }

@@ -22,10 +22,10 @@ namespace Jasiri.Reporting
         public static long ToUnixMs(long ticks)
             => (ticks - unixEpoch) / TicksPerUs;
 
-        public static long UnixStartMs(IZipkinSpan span)
+        public static long UnixStartMs(Span span)
             => ToUnixMs(span.StartTimeStamp.Value);
 
-        public static long DurationMs(IZipkinSpan span)
+        public static long DurationMs(Span span)
             => (span.FinishTimeStamp.Value - span.StartTimeStamp.Value).Ticks / 10;
 
     }

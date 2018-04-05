@@ -10,7 +10,7 @@ namespace Jasiri.OpenTracing
     public class OTSpan : ISpan
     {
         bool disposed = false;
-        readonly IZipkinSpan zipkinSpan;
+        readonly Span zipkinSpan;
         ISpanContext spanContext;
 
         public ISpanContext Context
@@ -19,10 +19,10 @@ namespace Jasiri.OpenTracing
         /// <summary>
         /// For testing purposes only
         /// </summary>
-        internal IZipkinSpan Wrapped => zipkinSpan;
+        internal Span Wrapped => zipkinSpan;
 
 
-        public OTSpan(IZipkinSpan zipkinSpan)
+        public OTSpan(Span zipkinSpan)
         {
             this.zipkinSpan = zipkinSpan ?? throw new ArgumentNullException(nameof(zipkinSpan));
         }
@@ -46,10 +46,10 @@ namespace Jasiri.OpenTracing
             return this; //zipkin no baggage support
         }
 
-        public ISpan Log(IEnumerable<KeyValuePair<string, object>> fields)
+        public ISpan Log(IDictionary<string, object> fields)
             => LogImpl(null, fields);
 
-        public ISpan Log(DateTimeOffset timestamp, IEnumerable<KeyValuePair<string, object>> fields)
+        public ISpan Log(DateTimeOffset timestamp, IDictionary<string, object> fields)
             => LogImpl(timestamp, fields);
 
         ISpan LogImpl(DateTimeOffset? timestamp, IEnumerable<KeyValuePair<string, object>> fields)

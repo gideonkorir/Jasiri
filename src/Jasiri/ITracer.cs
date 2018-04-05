@@ -13,12 +13,12 @@ namespace Jasiri
 
         IPropagationRegistry PropagationRegistry { get; }
 
-        IZipkinSpan ActiveSpan { get; }
+        IManageSpanScope ScopeManager { get; }
 
-        IZipkinSpan NewSpan(string operationName, bool forceNew = false);
+        Span NewSpan(string operationName, bool forceNew = false);
 
-        IZipkinSpan NewSpan(string operationName, SpanContext parentContext);
+        Span NewSpan(string operationName, SpanContext parentContext);
 
-        void Report(IZipkinSpan span);
+        void Report(Span span);
     }
 }

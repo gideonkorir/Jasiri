@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Collections;
+using System.Linq;
 
 namespace Jasiri.OpenTracing.Adapters
 {
@@ -18,12 +19,12 @@ namespace Jasiri.OpenTracing.Adapters
 
         public string this[string key]
         {
-            get => propagatorMap.Get(key);
+            get => propagatorMap.FirstOrDefault(c => c.Key == key).Value;
             set => propagatorMap.Set(key, value);
         }
 
         public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
-            => propagatorMap.GetEntries().GetEnumerator();
+            => propagatorMap.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();
